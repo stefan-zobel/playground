@@ -196,7 +196,7 @@ mod test {
         {
             cell = SyncCell::new(String::from("hello world"));
             let mut sync_ref_mut = cell.try_borrow_mut().unwrap();
-            let s2: &mut String = sync_ref_mut.deref_mut();
+            let s2: &mut String = &mut *sync_ref_mut;
             println!("got the string : {}", s2);
             s2.clear();
             s2.push_str("A changed string!");
@@ -206,7 +206,7 @@ mod test {
 
         // error[E0597]: 'borrowed value does not live long enough'
         //s.push_str(" - this shouldn't not work!");
-        let s3 = cell.try_borrow_mut().unwrap().to_string();
+        let s3 = &*cell.try_borrow_mut().unwrap();
         assert_eq!(s3, "A changed string!");
         println!("the string is still : {}", s3);
     }
