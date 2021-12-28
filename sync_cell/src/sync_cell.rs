@@ -14,6 +14,16 @@ pub trait ISyncCell<T: ?Sized> {
     fn borrow(&self) -> SyncRef<'_, T>;
 
     fn borrow_mut(&self) -> SyncRefMut<'_, T>;
+
+    fn into_inner(self) -> T
+    where
+        T: Default;
+
+    fn replace(&self, val: T) -> T;
+
+    fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T;
+
+    fn swap(&self, other: &Self);
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -181,11 +191,77 @@ impl<T> ISyncCell<T> for SyncCell<T> {
             }
         }
     }
+
+    fn into_inner(self) -> T
+    where
+        T: Default,
+    {
+        std::mem::take(&mut *self.borrow_mut())
+    }
+
+    fn replace(&self, val: T) -> T {
+        std::mem::replace(&mut *self.borrow_mut(), val)
+    }
+
+    fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
+        let mut_borrow = &mut *self.borrow_mut();
+        let replacement = f(mut_borrow);
+        std::mem::replace(mut_borrow, replacement)
+    }
+
+    fn swap(&self, other: &Self) {
+        std::mem::swap(&mut *self.borrow_mut(), &mut *other.borrow_mut())
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_swap() {
+        let hello = "hello";
+        let world = "world";
+        let hello_cell = SyncCell::new(String::from(hello));
+        let world_cell = SyncCell::new(String::from(world));
+        hello_cell.swap(&world_cell);
+        let sh = &*hello_cell.borrow();
+        let sw = &*world_cell.borrow();
+        assert_eq!(sh, world);
+        assert_eq!(sw, hello);
+    }
+
+    #[test]
+    fn test_replace_with() {
+        let f = |s: &mut String| {
+            s.push_str(" world");
+            s.clone()
+        };
+        let hello = "hello";
+        let cell = SyncCell::new(String::from(hello));
+        let res = cell.replace_with(f);
+        println!("result is : {}", res);
+        assert_eq!(res, "hello world");
+    }
+
+    #[test]
+    fn test_replace() {
+        let hello = "hello";
+        let cell = SyncCell::new(String::from(hello));
+        let orig = cell.replace(String::from("world world"));
+        println!("orig was : {}", orig);
+        assert_eq!(orig, hello);
+        let new = &*cell.borrow();
+        println!("new is : {}", new);
+        assert_eq!(new, "world world");
+    }
+
+    #[test]
+    fn test_into_inner() {
+        let cell = SyncCell::new(String::from("into inner"));
+        let s = cell.into_inner();
+        println!("got the string : {}", s);
+    }
 
     #[test]
     fn test_try_borrow_mut() {
