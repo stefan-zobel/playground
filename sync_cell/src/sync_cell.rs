@@ -112,7 +112,7 @@ pub struct SyncCell<T: ?Sized> {
     mutex: RMutex<UnsafeCell<T>>,
 }
 
-unsafe impl<T: ?Sized> Send for SyncCell<T> {}
+unsafe impl<T: ?Sized + Send> Send for SyncCell<T> {}
 unsafe impl<T: ?Sized> Sync for SyncCell<T> {}
 
 impl<T> SyncCell<T> {
@@ -168,18 +168,16 @@ impl<T> ISyncCell<T> for SyncCell<T> {
 
     fn borrow(&self) -> SyncRef<'_, T> {
         loop {
-            let borrow = self.try_borrow();
-            if borrow.is_some() {
-                return borrow.unwrap();
+            if let Some(syn_ref) = self.try_borrow() {
+                return syn_ref;
             }
         }
     }
 
     fn borrow_mut(&self) -> SyncRefMut<'_, T> {
         loop {
-            let borrow = self.try_borrow_mut();
-            if borrow.is_some() {
-                return borrow.unwrap();
+            if let Some(syn_ref) = self.try_borrow_mut() {
+                return syn_ref;
             }
         }
     }
