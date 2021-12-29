@@ -13,7 +13,7 @@ struct Worker {
 impl Worker {
     fn new(id: usize, receiver: Arc<SyncCell<Receiver<Job>>>) -> Worker {
         let handle = thread::spawn(move || loop {
-            let res = receiver.borrow().recv();
+            let res = receiver.borrow_mut().recv();
             match res {
                 Ok(job) => {
                     println!("Worker {} got job", id);
