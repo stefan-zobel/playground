@@ -24,6 +24,10 @@ pub trait ISyncCell<T: ?Sized> {
     fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T;
 
     fn swap(&self, other: &Self);
+
+    fn take(&self) -> T
+    where
+        T: Default;
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -199,6 +203,13 @@ impl<T> ISyncCell<T> for SyncCell<T> {
         std::mem::take(&mut *self.borrow_mut())
     }
 
+    fn take(&self) -> T
+    where
+        T: Default,
+    {
+        self.replace(Default::default())
+    }
+
     fn replace(&self, val: T) -> T {
         std::mem::replace(&mut *self.borrow_mut(), val)
     }
@@ -296,6 +307,18 @@ mod test {
         let new = &*cell.borrow();
         println!("new is : {}", new);
         assert_eq!(new, "world world");
+    }
+
+    #[test]
+    fn test_take() {
+        let hello = "hello";
+        let cell = SyncCell::new(String::from(hello));
+        let value = cell.take();
+        let after_take = &*cell.borrow();
+        println!("value is : {}", value);
+        println!("value after take is : {}", after_take);
+        assert_eq!(after_take, "");
+        assert_eq!(value, hello);
     }
 
     #[test]
