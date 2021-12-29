@@ -133,7 +133,7 @@ unsafe impl<T: ?Sized> Sync for SyncCell<T> {}
 impl<T> SyncCell<T> {
     #![allow(dead_code)]
     #[inline]
-    fn new(value: T) -> Self {
+    pub fn new(value: T) -> Self {
         SyncCell {
             mutex: RMutex::new(UnsafeCell::new(value)),
             state: Cell::new(CellState::Unshared),
@@ -251,6 +251,12 @@ impl<T: ?Sized + Clone> Clone for SyncCell<T> {
         dst.clone_from(source);
     }
 }
+
+//impl<T> AsRef<T> for SyncCell<T> {
+//    fn as_ref(&self) -> &T {
+//        unsafe {&*self.borrow().guard.get()}
+//    }
+//}
 
 impl<T: PartialEq> PartialEq for SyncCell<T> {
     fn eq(&self, other: &Self) -> bool {
