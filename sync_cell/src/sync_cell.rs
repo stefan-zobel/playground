@@ -1,6 +1,7 @@
 use parking_lot::lock_api::{ReentrantMutex, ReentrantMutexGuard};
 use parking_lot::{RawMutex, RawThreadId};
 use std::cell::{Cell, UnsafeCell};
+use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
 
 type RMutex<T> = ReentrantMutex<RawMutex, RawThreadId, T>;
@@ -248,6 +249,42 @@ impl<T: ?Sized + Clone> Clone for SyncCell<T> {
         let dst = &mut *self.borrow_mut();
         let source = &&*other.borrow();
         dst.clone_from(source);
+    }
+}
+
+impl<T: PartialEq> PartialEq for SyncCell<T> {
+    fn eq(&self, other: &Self) -> bool {
+        *self.borrow() == *other.borrow()
+    }
+}
+
+impl<T: Eq> Eq for SyncCell<T> {}
+
+impl<T: PartialOrd> PartialOrd for SyncCell<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.borrow().partial_cmp(&*other.borrow())
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+        *self.borrow() < *other.borrow()
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        *self.borrow() <= *other.borrow()
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        *self.borrow() > *other.borrow()
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        *self.borrow() >= *other.borrow()
+    }
+}
+
+impl<T: Ord> Ord for SyncCell<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.borrow().cmp(&*other.borrow())
     }
 }
 
