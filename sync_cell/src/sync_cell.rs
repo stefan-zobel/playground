@@ -203,13 +203,6 @@ impl<T> ISyncCell<T> for SyncCell<T> {
         std::mem::take(&mut *self.borrow_mut())
     }
 
-    fn take(&self) -> T
-    where
-        T: Default,
-    {
-        self.replace(Default::default())
-    }
-
     fn replace(&self, val: T) -> T {
         std::mem::replace(&mut *self.borrow_mut(), val)
     }
@@ -222,6 +215,13 @@ impl<T> ISyncCell<T> for SyncCell<T> {
 
     fn swap(&self, other: &Self) {
         std::mem::swap(&mut *self.borrow_mut(), &mut *other.borrow_mut())
+    }
+
+    fn take(&self) -> T
+    where
+        T: Default,
+    {
+        self.replace(Default::default())
     }
 }
 
