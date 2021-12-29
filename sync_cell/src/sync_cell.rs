@@ -214,9 +214,51 @@ impl<T> ISyncCell<T> for SyncCell<T> {
     }
 }
 
+impl<T> From<T> for SyncCell<T> {
+    #[inline]
+    fn from(val: T) -> Self {
+        SyncCell::new(val)
+    }
+}
+
+impl<T: ?Sized + Default> Default for SyncCell<T> {
+    #[inline]
+    fn default() -> Self {
+        SyncCell::new(Default::default())
+    }
+}
+
+impl<T: ?Sized + Clone> Clone for SyncCell<T> {
+    fn clone(&self) -> Self {
+        SyncCell::new(self.borrow().clone())
+    }
+
+    fn clone_from(&mut self, other: &Self) {
+        let dst = &mut *self.borrow_mut();
+        let source = &&*other.borrow();
+        dst.clone_from(source);
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_clone_from() {
+        let hello = "hello";
+        let world = "world";
+        let mut hello_cell = SyncCell::new(String::from(hello));
+        let world_cell = &SyncCell::new(String::from(world));
+
+        hello_cell.clone_from(world_cell);
+        let sh = &*hello_cell.borrow();
+        let sw = &*world_cell.borrow();
+        println!("after clone_from in dest: {}", sh);
+        assert_eq!(sh, world);
+        println!("after clone_from in source: {}", sw);
+        assert_eq!(sw, world);
+    }
 
     #[test]
     fn test_swap() {
