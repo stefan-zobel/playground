@@ -315,6 +315,24 @@ mod test {
     }
 
     #[test]
+    fn test_clone() {
+        let hello = "hello";
+        let hello_cell = SyncCell::new(String::from(hello));
+        let mut clone = hello_cell.clone();
+        {
+            let sc = &mut *clone.borrow_mut();
+            let sh = &*hello_cell.borrow();
+            assert_eq!(sc, hello);
+            assert_eq!(sh, hello);
+            sc.push_str(" - abc");
+        }
+        let sc = &*clone.borrow();
+        let sh = &mut *hello_cell.borrow_mut();
+        assert_eq!(sc, "hello - abc");
+        assert_eq!(sh, hello);
+    }
+
+    #[test]
     fn test_swap() {
         let hello = "hello";
         let world = "world";
