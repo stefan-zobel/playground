@@ -1,6 +1,7 @@
-use crate::sync_cell::{ISyncCell, SyncCell};
+use crate::arc_sync_cell::ArcSyncCell;
+use crate::sync_cell::ISyncCell;
+use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
-use std::sync::{mpsc, Arc};
 use std::thread;
 
 type Job = Box<dyn FnOnce() + Send + 'static>;
@@ -11,7 +12,7 @@ struct Worker {
 }
 
 impl Worker {
-    fn new(id: usize, receiver: Arc<SyncCell<Receiver<Job>>>) -> Worker {
+    fn new(id: usize, receiver: ArcSyncCell<Receiver<Job>>) -> Worker {
         let handle = thread::spawn(move || loop {
             let res = receiver.borrow_mut().recv();
             match res {
@@ -40,11 +41,11 @@ pub struct TestPool {
 impl TestPool {
     pub fn new(worker_count: usize) -> Self {
         let (send, receive) = mpsc::channel();
-        let receiver = Arc::new(SyncCell::new(receive));
+        let receiver = ArcSyncCell::new(receive);
         let mut workers = Vec::with_capacity(worker_count);
 
         for n in 0..worker_count {
-            workers.push(Worker::new(n, Arc::clone(&receiver)))
+            workers.push(Worker::new(n, ArcSyncCell::clone(&receiver)))
         }
 
         TestPool {
@@ -67,6 +68,7 @@ impl TestPool {
 mod tests {
     use super::*;
     use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
 
