@@ -318,7 +318,7 @@ mod test {
     fn test_clone() {
         let hello = "hello";
         let hello_cell = SyncCell::new(String::from(hello));
-        let mut clone = hello_cell.clone();
+        let clone = hello_cell.clone();
         {
             let sc = &mut *clone.borrow_mut();
             let sh = &*hello_cell.borrow();
