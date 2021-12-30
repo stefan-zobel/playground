@@ -45,7 +45,7 @@ impl TestPool {
         let mut workers = Vec::with_capacity(worker_count);
 
         for n in 0..worker_count {
-            workers.push(Worker::new(n, ArcSyncCell::clone(&receiver)))
+            workers.push(Worker::new(n, receiver.clone()))
         }
 
         TestPool {
