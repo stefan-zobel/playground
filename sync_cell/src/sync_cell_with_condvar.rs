@@ -147,66 +147,84 @@ impl<T> SyncCell2<T> {
             cond_not_exclusive: RCondVar::new(),
         }
     }
+
+    fn internal_try_borrow(&self, wait: bool) -> Option<SyncRef2<'_, T>> {
+        'outer: loop {
+            let mut lock: RMutexGuard<UnsafeCell<T>> = self.mutex.lock();
+            match self.state.get() {
+                CellState2::Unshared => {
+                    self.state.set(CellState2::Shared(1));
+                    return Some(SyncRef2 {
+                        cell: self,
+                        guard: lock,
+                    });
+                    // lock gets moved
+                }
+                CellState2::Shared(n) => {
+                    self.state.set(CellState2::Shared(n + 1));
+                    return Some(SyncRef2 {
+                        cell: self,
+                        guard: lock,
+                    });
+                    // lock gets moved
+                }
+                CellState2::Exclusive => {
+                    if wait {
+                        let guard = &mut lock;
+                        self.cond_not_exclusive.wait(guard);
+                        continue 'outer;
+                    } else {
+                        return None;
+                        // lock gets dropped
+                    }
+                }
+            }
+        }
+    }
+
+    fn internal_try_borrow_mut(&self, wait: bool) -> Option<SyncRefMut2<'_, T>> {
+        'outer: loop {
+            let mut lock: RMutexGuard<UnsafeCell<T>> = self.mutex.lock();
+            if let CellState2::Unshared = self.state.get() {
+                self.state.set(CellState2::Exclusive);
+                return Some(SyncRefMut2 {
+                    cell: self,
+                    guard: lock,
+                });
+                // lock gets moved
+            } else if wait {
+                let guard = &mut lock;
+                self.cond_unshared.wait(guard);
+                continue 'outer;
+            } else {
+                return None;
+                // lock gets dropped
+            }
+        }
+    }
 }
 
 impl<T> ISyncCell2<T> for SyncCell2<T> {
     fn try_borrow(&self) -> Option<SyncRef2<'_, T>> {
-        let lock: RMutexGuard<UnsafeCell<T>> = self.mutex.lock();
-        match self.state.get() {
-            CellState2::Unshared => {
-                self.state.set(CellState2::Shared(1));
-                Some(SyncRef2 {
-                    cell: self,
-                    guard: lock,
-                })
-                // lock gets moved
-            }
-            CellState2::Shared(n) => {
-                self.state.set(CellState2::Shared(n + 1));
-                Some(SyncRef2 {
-                    cell: self,
-                    guard: lock,
-                })
-                // lock gets moved
-            }
-            CellState2::Exclusive => None,
-            // lock gets dropped
-        }
+        self.internal_try_borrow(false)
     }
 
     fn try_borrow_mut(&self) -> Option<SyncRefMut2<'_, T>> {
-        let lock: RMutexGuard<UnsafeCell<T>> = self.mutex.lock();
-        if let CellState2::Unshared = self.state.get() {
-            self.state.set(CellState2::Exclusive);
-            Some(SyncRefMut2 {
-                cell: self,
-                guard: lock,
-            })
-            // lock gets moved
-        } else {
-            None
-            // lock gets dropped
-        }
+        self.internal_try_borrow_mut(false)
     }
 
     fn borrow(&self) -> SyncRef2<'_, T> {
         loop {
-            if let Some(syn_ref) = self.try_borrow() {
+            if let Some(syn_ref) = self.internal_try_borrow(true) {
                 return syn_ref;
-            } else {
-                let guard = &mut self.mutex.lock();
-                self.cond_not_exclusive.wait(guard);
             }
         }
     }
 
     fn borrow_mut(&self) -> SyncRefMut2<'_, T> {
         loop {
-            if let Some(syn_ref) = self.try_borrow_mut() {
+            if let Some(syn_ref) = self.internal_try_borrow_mut(true) {
                 return syn_ref;
-            } else {
-                let guard = &mut self.mutex.lock();
-                self.cond_unshared.wait(guard);
             }
         }
     }
