@@ -329,6 +329,39 @@ impl<T: Ord> Ord for SyncCell2<T> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::sync::Arc;
+    use std::thread;
+    use std::time::Duration;
+
+    #[test]
+    fn test_wait_notify() {
+        let hello = "hello";
+        let m1 = Arc::new(SyncCell2::new(String::from(hello)));
+        {
+            let m2 = m1.clone();
+            let sync_ref : SyncRef2<String> = m1.try_borrow().unwrap();
+            let sm1 = &*sync_ref;
+            let _t = thread::spawn(move || {
+                thread::sleep(Duration::from_secs(1));
+                // m1 should be locked now, we must wait until
+                // the lock from m1 gets dropped
+                println!("b) waiting for m1 to drop its lock");
+                let sm2 = &mut *m2.borrow_mut();
+                assert_eq!(sm2, hello);
+                println!("c) 2nd thread : {}", sm2);
+                sm2.push_str(" - abc");
+                println!("d) dropping lock on m2");
+            });
+            assert_eq!(sm1, hello);
+            println!("a) main thread : {}", sm1);
+            thread::sleep(Duration::from_secs(1));
+            // lock from m1 gets destroyed here
+        }
+        thread::sleep(Duration::from_secs(1));
+        let sm1 = &*m1.borrow();
+        assert_eq!(sm1, "hello - abc");
+        println!("e) main thread : {}", sm1);
+    }
 
     #[test]
     fn test_clone_from() {
