@@ -22,10 +22,10 @@ impl CondVarForRMutexGuard {
     #[inline]
     pub fn wait<R: RawMutex, G: GetThreadId, T: ?Sized>(
         &self,
-        g: &mut ReentrantMutexGuard<'_, R, G, T>,
+        lock: &mut ReentrantMutexGuard<'_, R, G, T>,
     ) {
         let new_guard = self.m.lock();
-        ReentrantMutexGuard::unlocked(g, || {
+        ReentrantMutexGuard::unlocked(lock, || {
             // Move the new guard in so it gets unlocked
             // before we re-lock the ReentrantMutexGuard
             let mut guard = new_guard;
