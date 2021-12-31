@@ -38,3 +38,9 @@ impl CondVarForRMutexGuard {
         self.c.notify_all();
     }
 }
+
+impl Default for CondVarForRMutexGuard {
+    fn default() -> Self {
+        Self::new()
+    }
+}
