@@ -3,6 +3,7 @@ use parking_lot::{Condvar, Mutex};
 
 pub type RCondVar = CondVarForRMutexGuard;
 
+#[derive(Debug)]
 pub struct CondVarForRMutexGuard {
     c: Condvar,
     m: Mutex<()>,
