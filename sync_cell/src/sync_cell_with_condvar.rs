@@ -334,7 +334,7 @@ mod test {
     use std::time::Duration;
 
     #[test]
-    fn test_wait_notify() {
+    fn test_two_threads() {
         let hello = "hello";
         let m1 = Arc::new(SyncCell2::new(String::from(hello)));
         {
@@ -342,7 +342,7 @@ mod test {
             let sync_ref : SyncRef2<String> = m1.try_borrow().unwrap();
             let sm1 = &*sync_ref;
             let _t = thread::spawn(move || {
-                thread::sleep(Duration::from_secs(1));
+                thread::sleep(Duration::from_millis(250));
                 // m1 should be locked now, we must wait until
                 // the lock from m1 gets dropped
                 println!("b) waiting for m1 to drop its lock");
@@ -355,7 +355,7 @@ mod test {
             assert_eq!(sm1, hello);
             println!("a) main thread : {}", sm1);
             thread::sleep(Duration::from_secs(1));
-            // lock from m1 gets destroyed here
+            // lock from m1 gets dropped here
         }
         thread::sleep(Duration::from_secs(1));
         let sm1 = &*m1.borrow();
