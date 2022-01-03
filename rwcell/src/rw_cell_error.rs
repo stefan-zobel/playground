@@ -13,6 +13,6 @@ impl Debug for RwCellError {
 
 impl Display for RwCellError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        Display::fmt("already borrowed", f)
+        Display::fmt("already mutably borrowed by current thread", f)
     }
 }
