@@ -3,6 +3,7 @@
 
 pub(crate) mod lock;
 pub mod rw_cell;
+pub mod rc_graph;
 
 #[cfg(test)]
 mod tests {
