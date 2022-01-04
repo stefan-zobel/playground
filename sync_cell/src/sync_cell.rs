@@ -255,7 +255,7 @@ impl<T: ?Sized + Clone> Clone for SyncCell<T> {
 //todo: is this safe?
 impl<T> AsRef<T> for SyncCell<T> {
     fn as_ref(&self) -> &T {
-        unsafe {&*self.borrow_mut().guard.get()}
+        unsafe { &*self.borrow_mut().guard.get() }
     }
 }
 

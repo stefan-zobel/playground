@@ -101,6 +101,17 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
     }
 }
 
+// todo: would this be safe?
+// (apart from the treatment of the  Err case)
+impl<T> AsRef<T> for RwCell<T> {
+    fn as_ref(&self) -> &T {
+        match self.borrow_mut() {
+            Ok(ref_mut) => unsafe { &*ref_mut.guard.get() },
+            Err(_) => panic!("already mutably borrowed by current thread"),
+        }
+    }
+}
+
 pub struct RwCellError {}
 
 impl Error for RwCellError {}
