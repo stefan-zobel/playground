@@ -90,13 +90,6 @@ impl<T: ?Sized> Drop for WriteGuard<'_, T> {
     }
 }
 
-impl<T> WriteGuard<'_, T> {
-    #[cfg(test)]
-    pub(crate) fn lock(&self) -> &Lock<T> {
-        self.lock
-    }
-}
-
 #[derive(Debug)]
 pub(crate) struct ReadGuard<'a, T: ?Sized> {
     guard: RwLockReadGuard<'a, RawRwLock, T>,
@@ -109,7 +102,7 @@ impl<T> Deref for WriteGuard<'_, T> {
     fn deref(&self) -> &Self::Target {
         #[cfg(test)]
         {
-            assert!(self.lock().is_owned_by_current_thread());
+            assert!(self.lock.is_owned_by_current_thread());
         }
         self.guard.deref()
     }
