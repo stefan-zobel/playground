@@ -102,7 +102,7 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
 }
 
 // todo: would this be safe?
-// (apart from the treatment of the  Err case)
+// (apart from the treatment of the Err case)
 impl<T> AsRef<T> for RwCell<T> {
     fn as_ref(&self) -> &T {
         match self.borrow_mut() {
@@ -131,6 +131,15 @@ impl Display for RwCellError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_as_ref() {
+        let hello = "hello world";
+        let cell = RwCell::new(String::from(hello));
+        let s = cell.as_ref();
+        assert_eq!(s, hello);
+        println!("{}", s);
+    }
 
     #[test]
     fn test_try_borrow_mut() {
