@@ -252,11 +252,12 @@ impl<T: ?Sized + Clone> Clone for SyncCell<T> {
     }
 }
 
-//impl<T> AsRef<T> for SyncCell<T> {
-//    fn as_ref(&self) -> &T {
-//        unsafe {&*self.borrow().guard.get()}
-//    }
-//}
+//todo: is this safe?
+impl<T> AsRef<T> for SyncCell<T> {
+    fn as_ref(&self) -> &T {
+        unsafe {&*self.borrow_mut().guard.get()}
+    }
+}
 
 impl<T: PartialEq> PartialEq for SyncCell<T> {
     fn eq(&self, other: &Self) -> bool {
