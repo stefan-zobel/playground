@@ -6,7 +6,7 @@ use std::ops::Deref;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Debug)]
-pub struct Lock<T: ?Sized> {
+pub(crate) struct Lock<T: ?Sized> {
     owner: Owner,
     rw_lock: RwLock<T>,
 }
@@ -16,7 +16,7 @@ unsafe impl<T: ?Sized + Send + Sync> Sync for Lock<T> {}
 
 impl<T> Lock<T> {
     #[inline]
-    pub fn new(val: T) -> Lock<T> {
+    pub(crate) fn new(val: T) -> Lock<T> {
         Lock {
             rw_lock: RwLock::new(val),
             owner: Default::default(),
@@ -24,17 +24,17 @@ impl<T> Lock<T> {
     }
 
     #[inline]
-    pub fn is_locked(&self) -> bool {
+    pub(crate) fn is_locked(&self) -> bool {
         self.rw_lock.is_locked()
     }
 
     #[inline]
-    pub fn is_owned_by_current_thread(&self) -> bool {
+    pub(crate) fn is_owned_by_current_thread(&self) -> bool {
         self.is_locked() && self.owner.is_current_thread()
     }
 
     #[inline]
-    pub fn try_read_shared(&self) -> Option<ReadGuard<'_, T>> {
+    pub(crate) fn try_read_shared(&self) -> Option<ReadGuard<'_, T>> {
         if let Some(lock) = self.rw_lock.try_read_recursive() {
             assert!(!self.owner.is_owned());
             return Some(ReadGuard { guard: lock });
@@ -43,7 +43,7 @@ impl<T> Lock<T> {
     }
 
     #[inline]
-    pub fn read_shared(&self) -> Result<ReadGuard<'_, T>, LockError> {
+    pub(crate) fn read_shared(&self) -> Result<ReadGuard<'_, T>, LockError> {
         if self.is_owned_by_current_thread() {
             return Err(LockError {});
         }
@@ -53,7 +53,7 @@ impl<T> Lock<T> {
     }
 
     #[inline]
-    pub fn try_write_exclusive(&self) -> Option<WriteGuard<'_, T>> {
+    pub(crate) fn try_write_exclusive(&self) -> Option<WriteGuard<'_, T>> {
         if let Some(lock) = self.rw_lock.try_write() {
             self.owner.take_ownership();
             return Some(WriteGuard {
@@ -65,7 +65,7 @@ impl<T> Lock<T> {
     }
 
     #[inline]
-    pub fn write_exclusive(&self) -> Result<WriteGuard<'_, T>, LockError> {
+    pub(crate) fn write_exclusive(&self) -> Result<WriteGuard<'_, T>, LockError> {
         if self.is_owned_by_current_thread() {
             return Err(LockError {});
         }
@@ -79,7 +79,7 @@ impl<T> Lock<T> {
 }
 
 #[derive(Debug)]
-pub struct WriteGuard<'a, T: ?Sized> {
+pub(crate) struct WriteGuard<'a, T: ?Sized> {
     lock: &'a Lock<T>,
     guard: RwLockWriteGuard<'a, RawRwLock, T>,
 }
@@ -91,7 +91,7 @@ impl<T: ?Sized> Drop for WriteGuard<'_, T> {
 }
 
 #[derive(Debug)]
-pub struct ReadGuard<'a, T: ?Sized> {
+pub(crate) struct ReadGuard<'a, T: ?Sized> {
     guard: RwLockReadGuard<'a, RawRwLock, T>,
 }
 
@@ -161,7 +161,7 @@ impl Default for Owner {
     }
 }
 
-pub struct LockError {}
+pub(crate) struct LockError {}
 
 impl Error for LockError {}
 
