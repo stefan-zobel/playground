@@ -366,12 +366,12 @@ impl<T> NodeRef<T> {
     }
 }
 
-/// Wraps a `std::cell::Ref` for a node’s data.
+/// Wraps a `RwRef` for a node’s data.
 pub struct Ref<'a, T> {
     _ref: RwRef<'a, Node<T>>,
 }
 
-/// Wraps a `std::cell::RefMut` for a node’s data.
+/// Wraps a `RwRefMut` for a node’s data.
 pub struct RefMut<'a, T> {
     _ref: RwRefMut<'a, Node<T>>,
 }
