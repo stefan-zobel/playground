@@ -8,7 +8,5 @@ pub mod rw_cell_error;
 mod tests {
     #[test]
     fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
     }
 }

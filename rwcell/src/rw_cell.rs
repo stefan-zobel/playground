@@ -102,6 +102,29 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn test_1() {}
+    fn test_try_borrow_mut() {
+        let mut s1: &mut String = &mut String::from("not initialized");
+        println!("{}", s1);
+
+        let cell;
+        {
+            cell = RwCell::new(String::from("hello world"));
+            let mut sync_ref_mut = cell.try_borrow_mut().unwrap();
+            let s2: &mut String = &mut *sync_ref_mut;
+            println!("got the string : {}", s2);
+            s2.clear();
+            s2.push_str("A changed string!");
+            s1 = s2;
+            println!("the string is now : {}", s1);
+        }
+
+        // error[E0597]: 'borrowed value does not live long enough'
+        //s1.push_str(" - this shouldn't not work!");
+        let s3 = &*cell.try_borrow_mut().unwrap();
+        assert_eq!(s3, "A changed string!");
+        println!("the string is still : {}", s3);
+    }
 }
