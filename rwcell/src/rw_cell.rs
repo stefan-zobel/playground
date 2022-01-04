@@ -13,6 +13,8 @@ unsafe impl<T: ?Sized + Send> Send for RwCell<T> {}
 unsafe impl<T: ?Sized + Send> Sync for RwCell<T> {}
 //unsafe impl<T: ?Sized + Send + Sync> Sync for RwCell<T> {} ?
 
+const ERR_MSG: &str = "already mutably borrowed by current thread";
+
 impl<T> RwCell<T> {
     #[inline]
     pub fn new(val: T) -> RwCell<T> {
@@ -49,6 +51,18 @@ impl<T> RwCell<T> {
             Ok(lock) => Ok(RwRefMut { guard: lock }),
             Err(_) => Err(RwCellError {}),
         }
+    }
+
+    #[inline]
+    pub fn borrow_panic(&self) -> RwRef<'_, T> {
+        self.borrow()
+            .expect(ERR_MSG)
+    }
+
+    #[inline]
+    pub fn borrow_mut_panic(&self) -> RwRefMut<'_, T> {
+        self.borrow_mut()
+            .expect(ERR_MSG)
     }
 }
 
@@ -102,13 +116,11 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
 }
 
 // todo: would this be safe?
-// (apart from the treatment of the Err case)
+// todo: do we need to borrow mutably?
 impl<T> AsRef<T> for RwCell<T> {
     fn as_ref(&self) -> &T {
-        match self.borrow_mut() {
-            Ok(ref_mut) => unsafe { &*ref_mut.guard.get() },
-            Err(_) => panic!("already mutably borrowed by current thread"),
-        }
+        let ptr = self.borrow_mut_panic().guard.get();
+        unsafe { &*ptr }
     }
 }
 
@@ -124,7 +136,7 @@ impl Debug for RwCellError {
 
 impl Display for RwCellError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt("already mutably borrowed by current thread", f)
+        Display::fmt(ERR_MSG, f)
     }
 }
 
