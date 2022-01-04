@@ -1,6 +1,7 @@
 use crate::lock::{Lock, ReadGuard, WriteGuard};
-use crate::rw_cell_error::RwCellError;
 use std::cell::UnsafeCell;
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Deref, DerefMut};
 
 #[derive(Debug)]
@@ -97,6 +98,22 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
     #[inline]
     fn default() -> Self {
         RwCell::new(Default::default())
+    }
+}
+
+pub struct RwCellError {}
+
+impl Error for RwCellError {}
+
+impl Debug for RwCellError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt("RwCellError", f)
+    }
+}
+
+impl Display for RwCellError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt("already mutably borrowed by current thread", f)
     }
 }
 
