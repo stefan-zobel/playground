@@ -162,7 +162,7 @@ mod tests {
         {
             cell = RwCell::new(String::from("hello world"));
             let mut sync_ref_mut = cell.try_borrow_mut().unwrap();
-            let s2: &mut String = &mut *sync_ref_mut;
+            let ref mut s2 = *sync_ref_mut;
             println!("got the string : {}", s2);
             s2.clear();
             s2.push_str("A changed string!");
