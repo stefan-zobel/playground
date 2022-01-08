@@ -40,7 +40,7 @@ pub fn raw_seed() -> i64 {
     let last_seed = &mut *guard;
     let mut seed = pseudo_random_seed();
     loop {
-        if seed == 0 || seed == *last_seed {
+        if seed == 0i64 || seed == *last_seed {
             seed = pseudo_random_seed();
         } else {
             break;
@@ -82,9 +82,9 @@ mod simple_seed_tests {
         let u1 = next_seed_uniquifier();
         let u2 = next_seed_uniquifier();
         let u3 = next_seed_uniquifier();
-        assert_eq!(u1, 3447679086515839964);
-        assert_eq!(u2, -2942033378085796212);
-        assert_eq!(u3, 9105146733113736444);
+        assert_eq!(u1, 3447679086515839964i64);
+        assert_eq!(u2, -2942033378085796212i64);
+        assert_eq!(u3, 9105146733113736444i64);
         println!("u1: {}", u1);
         println!("u2: {}", u2);
         println!("u3: {}", u3);

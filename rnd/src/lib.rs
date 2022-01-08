@@ -1,5 +1,6 @@
 pub mod bit_mix;
 pub mod seed;
+pub mod split_mix64_seed;
 
 #[cfg(test)]
 mod lib_tests {
