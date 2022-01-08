@@ -14,6 +14,13 @@ pub const fn rrxmrrxmsx(mut v: i64) -> i64 {
     v ^ (v as u64 >> 28) as i64
 }
 
+#[inline]
+pub const fn lea_mix64(mut v: i64) -> i64 {
+    v = (v ^ (v as u64 >> 32) as i64).wrapping_mul(0xdaba0b6eb09322e3u64 as i64);
+    v = (v ^ (v as u64 >> 32) as i64).wrapping_mul(0xdaba0b6eb09322e3u64 as i64);
+    v ^ (v as u64 >> 32) as i64
+}
+
 #[cfg(test)]
 mod bit_mix_tests {
     use super::*;
