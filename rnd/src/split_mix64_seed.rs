@@ -9,18 +9,18 @@ const GOLDEN: i64 = 0x9e3779b97f4a7c15u64 as i64;
 static STATE: Mutex<RawMutex, i64> = const_mutex(0i64);
 
 #[inline]
-fn ensure_state(guard: &mut MutexGuard<RawMutex, i64>) {
+fn ensure_state<'a>(guard: &'a mut MutexGuard<RawMutex, i64>) -> &'a mut i64 {
     let state = guard.deref_mut();
     if *state == 0i64 {
         *state = raw_seed();
     }
+    state
 }
 
 #[inline]
 pub fn seed() -> i64 {
     let mut guard = STATE.lock();
-    ensure_state(&mut guard);
-    let state = &mut *guard;
+    let state = ensure_state(&mut guard);
     *state += GOLDEN;
     rrxmrrxmsx(*state)
 }
