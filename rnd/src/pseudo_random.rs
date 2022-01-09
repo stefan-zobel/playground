@@ -216,7 +216,26 @@ impl PseudoRandom for Lcg64Xor1024Mix {
 impl Lcg64Xor1024Mix {
     #[inline]
     pub fn new() -> Self {
-        todo!()
+        Lcg64Xor1024Mix::internal_new(&mut XorShift128Plus::new())
+    }
+
+    #[inline]
+    pub fn new_from(seed: i64) -> Self {
+        Lcg64Xor1024Mix::internal_new(&mut XorShift128Plus::new_from(seed))
+    }
+
+    #[inline]
+    fn internal_new(seeder: &mut XorShift128Plus) -> Self {
+        let mut instance = Lcg64Xor1024Mix {
+            a: seeder.next_long(),
+            s: seeder.next_long(),
+            pos: 15usize,
+            seed: [0i64; 16],
+        };
+        for i in 0..16 {
+            instance.seed[i] = seeder.next_long();
+        }
+        instance
     }
 }
 

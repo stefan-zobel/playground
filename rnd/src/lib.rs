@@ -7,12 +7,35 @@ mod xor_shift_128plus;
 
 #[cfg(test)]
 mod lib_tests {
+    use crate::pseudo_random::Lcg64Xor1024Mix;
     use crate::pseudo_random::PseudoRandom as _;
     use crate::pseudo_random::Stc64;
     use crate::pseudo_random::XoShiRo256StarStar;
     use crate::seed::raw_seed;
     use crate::split_mix64::SplitMix64;
     use crate::xor_shift_128plus::XorShift128Plus;
+
+    #[test]
+    fn test_lcg64_xor_1024mix() {
+        let mut prng = Lcg64Xor1024Mix::new();
+        for _ in 0..6 {
+            println!("{}", prng.next_long());
+        }
+        for _ in 0..16 {
+            assert_ne!(prng.next_long(), prng.next_long());
+        }
+    }
+
+    #[test]
+    fn test_lcg64_xor_1024mix_double() {
+        let mut prng = Lcg64Xor1024Mix::new();
+        for _ in 0..16 {
+            println!("{}", prng.next_double());
+        }
+        for _ in 0..16 {
+            assert_ne!(prng.next_double(), prng.next_double());
+        }
+    }
 
     #[test]
     fn test_xoshiro() {
