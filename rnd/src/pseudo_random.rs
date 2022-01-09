@@ -167,3 +167,47 @@ impl Default for XoShiRo256StarStar {
         Self::new()
     }
 }
+
+/*
+ * Multiplier used in the LCG portion of the algorithm. Chosen based on
+ * research by Sebastiano Vigna and Guy Steele (2019). The spectral scores
+ * for dimensions 2 through 8 for the multiplier 0xd1342543de82ef95 are
+ * [0.958602, 0.937479, 0.870757, 0.822326, 0.820405, 0.813065, 0.760215].
+ */
+const M: i64 = 0xd1342543de82ef95u64 as i64;
+
+pub struct Lcg64Xor1024Mix {
+    /*
+     * The parameter that is used as an additive constant for the LCG.
+     * Must be odd.
+     */
+    a: i64,
+    /*
+     * The per-instance state: s for the LCG; the array seed for the XBG;
+     * pos is the rotating pointer into the array seed. At least one of
+     * the 16 elements of the array seed must be nonzero.
+     */
+    s: i64,
+    pos: usize,
+    seed: [i64; 16],
+}
+
+impl PseudoRandom for Lcg64Xor1024Mix {
+    #[inline]
+    fn next_long(&mut self) -> i64 {
+        todo!()
+    }
+}
+
+impl Lcg64Xor1024Mix {
+    pub fn new() -> Self {
+        todo!()
+    }
+}
+
+impl Default for Lcg64Xor1024Mix {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
