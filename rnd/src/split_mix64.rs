@@ -1,4 +1,7 @@
-use crate::{bit_mix::rrxmrrxmsx, bit_mix::xnasam, bit_mix::stafford_mix04, split_mix64_seed::seed, split_mix64_seed::seed_from};
+use crate::{
+    bit_mix::rrxmrrxmsx, bit_mix::stafford_mix04, bit_mix::xnasam, split_mix64_seed::seed,
+    split_mix64_seed::seed_from,
+};
 
 // the golden ratio scaled to 64 bits
 const GOLDEN: i64 = 0x9e3779b97f4a7c15u64 as i64;
