@@ -3,6 +3,8 @@ use parking_lot::lock_api::Mutex;
 use parking_lot::{const_mutex, RawMutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+static mut UNUSED: u8 = 0u8;
+
 static mut SEED_UNIQUIFIER: i64 = 0x1ed8b55fac9deci64;
 
 static LAST_SEED: Mutex<RawMutex, i64> = const_mutex(0i64);
@@ -33,6 +35,11 @@ fn next_seed_uniquifier() -> i64 {
 fn pseudo_random_seed() -> i64 {
     let seed = next_seed_uniquifier() ^ nano_time();
     bit_mix::stafford_mix13(seed)
+}
+
+#[inline]
+pub fn black_hole(val: u8) {
+    unsafe { UNUSED = val; }
 }
 
 pub fn raw_seed() -> i64 {

@@ -24,3 +24,12 @@ pub fn seed() -> i64 {
     *state += GOLDEN;
     rrxmrrxmsx(*state)
 }
+
+#[inline]
+pub fn seed_from(seed: i64) -> i64 {
+    let mut s = seed;
+    if s == 0i64 {
+        s = 0xffea4f554090c1d1u64 as i64;
+    }
+    rrxmrrxmsx(s + GOLDEN)
+}
