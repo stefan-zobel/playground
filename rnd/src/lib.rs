@@ -1,8 +1,9 @@
 pub mod bit_mix;
-pub mod seed;
-pub mod split_mix64;
-pub mod split_mix64_seed;
-pub mod xor_shift_128plus;
+pub mod pseudo_random;
+mod seed;
+mod split_mix64;
+mod split_mix64_seed;
+mod xor_shift_128plus;
 
 #[cfg(test)]
 mod lib_tests {

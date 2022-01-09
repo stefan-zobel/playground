@@ -38,11 +38,11 @@ fn pseudo_random_seed() -> i64 {
 }
 
 #[inline]
-pub fn black_hole(val: u8) {
+pub (crate) fn black_hole(val: u8) {
     unsafe { UNUSED = val; }
 }
 
-pub fn raw_seed() -> i64 {
+pub (crate) fn raw_seed() -> i64 {
     let mut guard = LAST_SEED.lock();
     let last_seed = &mut *guard;
     let mut seed = pseudo_random_seed();

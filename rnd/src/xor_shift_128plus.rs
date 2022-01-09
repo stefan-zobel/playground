@@ -1,14 +1,14 @@
 use crate::seed::black_hole;
 use crate::split_mix64::SplitMix64;
 
-pub struct XorShift128Plus {
+pub (crate) struct XorShift128Plus {
     x0: i64,
     x1: i64,
 }
 
 impl XorShift128Plus {
     #[inline]
-    pub fn next_long(&mut self) -> i64 {
+    pub (crate) fn next_long(&mut self) -> i64 {
         let s0 = self.x1;
         let mut s1 = self.x0;
         let s = s1.wrapping_add(s0);
@@ -19,13 +19,14 @@ impl XorShift128Plus {
     }
 
     #[inline]
-    pub fn new() -> Self {
+    pub (crate) fn new() -> Self {
         let mut rng = SplitMix64::new();
         XorShift128Plus::internal_new(&mut rng)
     }
 
+    #[allow(unused)]
     #[inline]
-    pub fn new_from(seed: i64) -> Self {
+    pub (crate) fn new_from(seed: i64) -> Self {
         let mut rng = SplitMix64::new_from(seed);
         XorShift128Plus::internal_new(&mut rng)
     }
