@@ -9,9 +9,28 @@ mod xor_shift_128plus;
 mod lib_tests {
     use crate::pseudo_random::PseudoRandom as _;
     use crate::pseudo_random::Stc64;
+    use crate::pseudo_random::XoShiRo256StarStar;
     use crate::seed::raw_seed;
     use crate::split_mix64::SplitMix64;
     use crate::xor_shift_128plus::XorShift128Plus;
+
+    #[test]
+    fn test_xoshiro() {
+        let mut prng = XoShiRo256StarStar::new();
+        for _ in 0..6 {
+            println!("{}", prng.next_long());
+        }
+        assert_ne!(prng.next_long(), prng.next_long());
+    }
+
+    #[test]
+    fn test_xoshiro_double() {
+        let mut prng = XoShiRo256StarStar::new();
+        for _ in 0..11 {
+            println!("{}", prng.next_double());
+        }
+        assert_ne!(prng.next_double(), prng.next_double());
+    }
 
     #[test]
     fn test_stc64_next_double() {

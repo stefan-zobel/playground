@@ -96,3 +96,74 @@ impl Default for Stc64 {
         Self::new()
     }
 }
+
+pub struct XoShiRo256StarStar {
+    x0: i64,
+    x1: i64,
+    x2: i64,
+    x3: i64,
+}
+
+impl PseudoRandom for XoShiRo256StarStar {
+    #[inline]
+    fn next_long(&mut self) -> i64 {
+        let s1 = self.x1;
+        let t = s1 << 17;
+        let x = s1.wrapping_add(s1 << 2);
+        let mut rnd = (x << 7) | (x as u64 >> 57) as i64;
+        rnd = rnd.wrapping_add(rnd << 3);
+
+        self.x2 ^= self.x0;
+        self.x3 ^= s1;
+        self.x1 ^= self.x2;
+        let s3 = self.x3;
+        self.x0 ^= s3;
+
+        self.x2 ^= t;
+        self.x3 = (s3 << 45) | (s3 as u64 >> 19) as i64;
+
+        rnd
+    }
+}
+
+impl XoShiRo256StarStar {
+    #[inline]
+    pub fn new() -> Self {
+        XoShiRo256StarStar::internal_new(&mut XorShift128Plus::new())
+    }
+
+    #[inline]
+    pub fn new_from(seed: i64) -> Self {
+        XoShiRo256StarStar::internal_new(&mut XorShift128Plus::new_from(seed))
+    }
+
+    #[inline]
+    fn internal_new(seeder: &mut XorShift128Plus) -> Self {
+        let mut instance = XoShiRo256StarStar {
+            x0: seeder.next_long(),
+            x1: seeder.next_long(),
+            x2: seeder.next_long(),
+            x3: seeder.next_long(),
+        };
+        instance.escape();
+        instance
+    }
+
+    #[inline]
+    fn escape(&mut self) {
+        let mut l: i64 = 0i64;
+        for _ in 0..20 {
+            l = self.next_long();
+        }
+        if l == 0i64 {
+            black_hole(l as u8);
+        }
+    }
+}
+
+impl Default for XoShiRo256StarStar {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
