@@ -6,14 +6,22 @@ pub struct Stc64 {
     s1: i64,
     s2: i64,
     s3: i64,
-    inc: i64,
     seq: i64,
 }
 
 impl Stc64 {
     pub fn next_long(&mut self) -> i64 {
-        // todo
-        -1
+        let xb = self.s1;
+        let xc = self.s2;
+
+        self.s3 = self.s3.wrapping_add(self.seq);
+        let rnd = (self.s0 ^ self.s3).wrapping_add(xb);
+
+        self.s0 = xb ^ (xb as u64 >> 11) as i64;
+        self.s1 = xc.wrapping_add(xc << 3);
+        self.s2 = ((xc << 24) | (xc as u64 >> 40) as i64).wrapping_add(rnd);
+
+        rnd
     }
 
     pub fn new() -> Self {
@@ -30,7 +38,6 @@ impl Stc64 {
             s1: seed.wrapping_add(0x26aa069ea2fb1a4di64),
             s2: seed.wrapping_add(0x70c72c95cd592d04i64),
             s3: seed.wrapping_add(0x504f333d3aa0b359i64),
-            inc: 0i64,
             // seq must be odd
             seq: (((seed.wrapping_add(0x3504f333d3aa0b37i64)) << 1) | 1i64),
         };
