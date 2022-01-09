@@ -51,3 +51,9 @@ impl XorShift128Plus {
         }
     }
 }
+
+impl Default for XorShift128Plus {
+    fn default() -> Self {
+        Self::new()
+    }
+}

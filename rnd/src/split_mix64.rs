@@ -56,3 +56,9 @@ const fn mix_gamma(mut v: i64) -> i64 {
         v
     }
 }
+
+impl Default for SplitMix64 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
