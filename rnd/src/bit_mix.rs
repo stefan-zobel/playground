@@ -6,6 +6,12 @@ pub const fn stafford_mix13(mut v: i64) -> i64 {
 }
 
 #[inline]
+pub const fn stafford_mix04(mut v: i64) -> i32 {
+    v = (v ^ (v as u64 >> 33) as i64).wrapping_mul(0x62a9d9ed799705f5i64);
+    (((v ^ (v as u64 >> 28) as i64).wrapping_mul(0xcb24d0a5c88c35b3u64 as i64)) as u64 >> 32) as i32
+}
+
+#[inline]
 pub const fn rrxmrrxmsx(mut v: i64) -> i64 {
     v ^= ((v as u64 >> 25) as i64 | (v << 39)) ^ ((v as u64 >> 50) as i64 | (v << 14));
     v = v.wrapping_mul(0xa24baed4963ee407u64 as i64);
@@ -47,6 +53,54 @@ mod bit_mix_tests {
         assert_eq!(l3, 8519880896858805593i64);
         assert_eq!(l4, 6042095800684428140i64);
         assert_eq!(l5, 7558165513295548834i64);
+    }
+
+    #[test]
+    fn test_stafford_mix04() {
+        let l1 = -3222165538581252362i64;
+        let l2 = -6575083715474529190i64;
+        let l3 = 5852023251876651789i64;
+        let l4 = -2105427755758183442i64;
+        let l5 = 8768027636157682880i64;
+        let l1 = stafford_mix04(l1);
+        let l2 = stafford_mix04(l2);
+        let l3 = stafford_mix04(l3);
+        let l4 = stafford_mix04(l4);
+        let l5 = stafford_mix04(l5);
+        println!("l1: {}", l1);
+        println!("l2: {}", l2);
+        println!("l3: {}", l3);
+        println!("l4: {}", l4);
+        println!("l5: {}", l5);
+        assert_eq!(l1, -1774945203i32);
+        assert_eq!(l2, -1767222429i32);
+        assert_eq!(l3, 1317024783i32);
+        assert_eq!(l4, -1566290268i32);
+        assert_eq!(l5, -1588154649i32);
+    }
+
+    #[test]
+    fn test_lea_mix64() {
+        let l1 = -3222165538581252362i64;
+        let l2 = -6575083715474529190i64;
+        let l3 = 5852023251876651789i64;
+        let l4 = -2105427755758183442i64;
+        let l5 = 8768027636157682880i64;
+        let l1 = lea_mix64(l1);
+        let l2 = lea_mix64(l2);
+        let l3 = lea_mix64(l3);
+        let l4 = lea_mix64(l4);
+        let l5 = lea_mix64(l5);
+        println!("l1: {}", l1);
+        println!("l2: {}", l2);
+        println!("l3: {}", l3);
+        println!("l4: {}", l4);
+        println!("l5: {}", l5);
+        assert_eq!(l1, -2558215071332148552i64);
+        assert_eq!(l2, -2639391046102820563i64);
+        assert_eq!(l3, -8069027239477572864i64);
+        assert_eq!(l4, -5084964469365455950i64);
+        assert_eq!(l5, -691027536433306030i64);
     }
 
     #[test]
