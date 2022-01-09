@@ -1,3 +1,4 @@
+use crate::bit_mix::lea_mix64;
 use crate::seed::black_hole;
 use crate::xor_shift_128plus::XorShift128Plus;
 
@@ -195,11 +196,25 @@ pub struct Lcg64Xor1024Mix {
 impl PseudoRandom for Lcg64Xor1024Mix {
     #[inline]
     fn next_long(&mut self) -> i64 {
-        todo!()
+        // xoroshiro1024: part 1
+        let p = self.pos;
+        let mut s15 = self.seed[p];
+        self.pos = (p + 1) & 15;
+        let s0 = self.seed[self.pos];
+        // compute result
+        let rnd = lea_mix64(self.s.wrapping_add(s0));
+        // update LCG sub-generator
+        self.s = (M.wrapping_mul(self.s)).wrapping_add(self.a);
+        // xoroshiro1024: part 2
+        s15 ^= s0;
+        self.seed[p] = ((s0 << 25) | (s0 as u64 >> 39) as i64) ^ s15 ^ (s15 << 27);
+        self.seed[self.pos] = (s15 << 36) | (s15 as u64 >> 28) as i64;
+        rnd
     }
 }
 
 impl Lcg64Xor1024Mix {
+    #[inline]
     pub fn new() -> Self {
         todo!()
     }
