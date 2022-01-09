@@ -21,7 +21,7 @@ fn ensure_state<'a>(guard: &'a mut MutexGuard<RawMutex, i64>) -> &'a mut i64 {
 pub fn seed() -> i64 {
     let mut guard = STATE.lock();
     let state = ensure_state(&mut guard);
-    *state += GOLDEN;
+    *state = state.wrapping_add(GOLDEN);
     rrxmrrxmsx(*state)
 }
 
@@ -31,5 +31,5 @@ pub fn seed_from(seed: i64) -> i64 {
     if s == 0i64 {
         s = 0xffea4f554090c1d1u64 as i64;
     }
-    rrxmrrxmsx(s + GOLDEN)
+    rrxmrrxmsx(s.wrapping_add(GOLDEN))
 }

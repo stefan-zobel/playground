@@ -1,4 +1,4 @@
-use crate::{bit_mix::rrxmrrxmsx, split_mix64_seed::seed, split_mix64_seed::seed_from};
+use crate::{bit_mix::rrxmrrxmsx, bit_mix::xnasam, bit_mix::stafford_mix04, split_mix64_seed::seed, split_mix64_seed::seed_from};
 
 // the golden ratio scaled to 64 bits
 const GOLDEN: i64 = 0x9e3779b97f4a7c15u64 as i64;
@@ -21,10 +21,22 @@ impl SplitMix64 {
     }
 
     #[inline]
+    pub fn next_long(&mut self) -> i64 {
+        self.state = self.state.wrapping_add(self.gamma);
+        xnasam(self.state)
+    }
+
+    #[inline]
+    pub fn next_int(&mut self) -> i32 {
+        self.state = self.state.wrapping_add(self.gamma);
+        stafford_mix04(self.state)
+    }
+
+    #[inline]
     fn internal_new(seed: i64) -> Self {
         SplitMix64 {
             state: seed,
-            gamma: mix_gamma(seed + GOLDEN),
+            gamma: mix_gamma(seed.wrapping_add(GOLDEN)),
         }
     }
 }
