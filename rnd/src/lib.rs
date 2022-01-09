@@ -7,10 +7,20 @@ mod xor_shift_128plus;
 
 #[cfg(test)]
 mod lib_tests {
+    use crate::pseudo_random::PseudoRandom as _;
     use crate::pseudo_random::Stc64;
     use crate::seed::raw_seed;
     use crate::split_mix64::SplitMix64;
     use crate::xor_shift_128plus::XorShift128Plus;
+
+    #[test]
+    fn test_stc64_next_double() {
+        let mut prng = Stc64::new();
+        for _ in 0..11 {
+            println!("{}", prng.next_double());
+        }
+        assert_ne!(prng.next_double(), prng.next_double());
+    }
 
     #[test]
     fn test_stc64() {

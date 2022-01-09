@@ -54,6 +54,7 @@ impl XorShift128Plus {
 }
 
 impl Default for XorShift128Plus {
+    #[inline]
     fn default() -> Self {
         Self::new()
     }
