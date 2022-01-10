@@ -1,4 +1,4 @@
-pub mod bit_mix;
+mod bit_mix;
 pub mod pseudo_random;
 mod seed;
 mod split_mix64;

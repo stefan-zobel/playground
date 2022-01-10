@@ -1,18 +1,18 @@
 #[inline]
-pub const fn stafford_mix13(mut v: i64) -> i64 {
+pub (crate) const fn stafford_mix13(mut v: i64) -> i64 {
     v = (v ^ (v as u64 >> 30) as i64).wrapping_mul(0xbf58476d1ce4e5b9u64 as i64);
     v = (v ^ (v as u64 >> 27) as i64).wrapping_mul(0x94d049bb133111ebu64 as i64);
     v ^ (v as u64 >> 31) as i64
 }
 
 #[inline]
-pub const fn stafford_mix04(mut v: i64) -> i32 {
+pub (crate) const fn stafford_mix04(mut v: i64) -> i32 {
     v = (v ^ (v as u64 >> 33) as i64).wrapping_mul(0x62a9d9ed799705f5i64);
     (((v ^ (v as u64 >> 28) as i64).wrapping_mul(0xcb24d0a5c88c35b3u64 as i64)) as u64 >> 32) as i32
 }
 
 #[inline]
-pub const fn rrxmrrxmsx(mut v: i64) -> i64 {
+pub (crate) const fn rrxmrrxmsx(mut v: i64) -> i64 {
     v ^= ((v as u64 >> 25) as i64 | (v << 39)) ^ ((v as u64 >> 50) as i64 | (v << 14));
     v = v.wrapping_mul(0xa24baed4963ee407u64 as i64);
     v ^= ((v as u64 >> 24) as i64 | (v << 40)) ^ ((v as u64 >> 49) as i64 | (v << 15));
@@ -21,7 +21,7 @@ pub const fn rrxmrrxmsx(mut v: i64) -> i64 {
 }
 
 #[inline]
-pub const fn xnasam(mut v: i64) -> i64 {
+pub (crate) const fn xnasam(mut v: i64) -> i64 {
     v ^= 0x6a09e667f3bcc909i64;
     v ^= ((v as u64 >> 25) as i64 | (v << 39)) ^ ((v as u64 >> 47) as i64 | (v << 17));
     v = v.wrapping_mul(0x9e6c63d0676a9a99u64 as i64);
@@ -31,7 +31,7 @@ pub const fn xnasam(mut v: i64) -> i64 {
 }
 
 #[inline]
-pub const fn lea_mix64(mut v: i64) -> i64 {
+pub (crate) const fn lea_mix64(mut v: i64) -> i64 {
     v = (v ^ (v as u64 >> 32) as i64).wrapping_mul(0xdaba0b6eb09322e3u64 as i64);
     v = (v ^ (v as u64 >> 32) as i64).wrapping_mul(0xdaba0b6eb09322e3u64 as i64);
     v ^ (v as u64 >> 32) as i64
