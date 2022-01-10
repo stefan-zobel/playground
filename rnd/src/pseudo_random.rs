@@ -41,8 +41,10 @@ pub trait PseudoRandom {
 /// Sfc64. See
 /// <https://github.com/tylov/STC/blob/master/include/stc/crandom.h>.
 /// <p>
-/// This generator has a guaranteed period of at least 2<sup>64</sup> and an
-/// average period of 2<sup>255</sup>.
+/// This generator has a guaranteed period of at least 2<sup>64</sup>
+/// and an average period of 2<sup>255</sup>.
+/// <p>
+/// This is the fastest generator supplied in this crate.
 pub struct Stc64 {
     s0: i64,
     s1: i64,
@@ -201,8 +203,8 @@ const M: i64 = 0xd1342543de82ef95u64 as i64;
 
 /// The L64X1024MixRandom algorithm from JDK 17 which uses a linear
 /// congruential generator (LCG) as a first subgenerator and a Xor-based
-/// generator (xoroshiro1024) as a second subgenerator and then applies a 64-bit
-/// mixing function identified by Doug Lea.
+/// generator (xoroshiro1024) as a second subgenerator and then applies
+/// a 64-bit mixing function identified by Doug Lea.
 /// <p>
 /// This generator has a 1088-bit state and a period of
 /// 2<sup>64</sup>(2<sup>1024</sup>&minus;1).
