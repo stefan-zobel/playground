@@ -27,6 +27,8 @@ fn next_seed_uniquifier() -> i64 {
     // Pierre L'Ecuyer: "Tables of Linear Congruential Generators
     // of Different Sizes and Good Lattice Structure"
     unsafe {
+        // SAFETY: this is safe because we are always
+        // protected by the mutex acquired in raw_seed()
         SEED_UNIQUIFIER = SEED_UNIQUIFIER.wrapping_mul(0x106689d45497fdb5i64);
         SEED_UNIQUIFIER
     }
@@ -38,11 +40,17 @@ fn pseudo_random_seed() -> i64 {
 }
 
 #[inline]
-pub (crate) fn black_hole(val: u8) {
-    unsafe { UNUSED = val; }
+pub(crate) fn black_hole(val: u8) {
+    // SAFETY: this is safe because we really don't care what gets
+    // written into the UNUSED location either by a single thread
+    // or concurrently by multiple threads, neither will we ever
+    // attempt to read that memory location
+    unsafe {
+        UNUSED = val;
+    }
 }
 
-pub (crate) fn raw_seed() -> i64 {
+pub(crate) fn raw_seed() -> i64 {
     let mut guard = LAST_SEED.lock();
     let last_seed = &mut *guard;
     let mut seed = pseudo_random_seed();
