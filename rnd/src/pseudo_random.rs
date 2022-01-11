@@ -6,31 +6,36 @@ const DOUBLE_NORM: f64 = 1.0f64 / (1i64 << 53) as f64;
 const FLOAT_NORM: f32 = 1.0f32 / (1i32 << 24) as f32;
 
 /// A generator of uniform pseudorandom values.
-/// <p>
-/// Implementors need to supply an implementation of the next_long() method.
-/// </p>
+///
+/// Implementors need to supply an implementation of the [`next_long`](Self::next_long) method.
+///
 /// The default implementations in this trait are efficient for methods that need
 /// at least 33 bits of randomness but somehow wasteful for the other methods because
-/// it dissipates valuable random bits piled up in the call to next_long() whenever
+/// it dissipates valuable random bits piled up in the call to `next_long()` whenever
 /// less than 33 random bits are needed for the result type.
 pub trait PseudoRandom {
+    /// Returns a uniformly distributed signed 64-bit integer.
     fn next_long(&mut self) -> i64;
 
+    /// Returns a uniformly distributed signed 32-bit integer.
     #[inline]
     fn next_int(&mut self) -> i32 {
         ((self.next_long() as u64 >> 32) as i64) as i32
     }
 
+    /// Returns a uniformly distributed signed 64-bit floating point value.
     #[inline]
     fn next_double(&mut self) -> f64 {
         ((self.next_long() as u64 >> 11) as i64) as f64 * DOUBLE_NORM
     }
 
+    /// Returns a uniformly distributed signed 32-bit floating point value.
     #[inline]
     fn next_float(&mut self) -> f32 {
         ((self.next_long() as u64 >> 40) as i64) as f32 * FLOAT_NORM
     }
 
+    /// Returns an equi-distributed boolean value.
     #[inline]
     fn next_bool(&mut self) -> bool {
         self.next_long() < 0i64
@@ -40,10 +45,10 @@ pub trait PseudoRandom {
 /// The 256-bit generator `Stc64` is Tyge Løvset's improved variation of
 /// `Sfc64`. See
 /// <https://github.com/tylov/STC/blob/master/include/stc/crandom.h>.
-/// <p>
+///
 /// This generator has a guaranteed period of at least 2<sup>64</sup>
 /// and an average period of 2<sup>255</sup>.
-/// <p>
+///
 /// This is the fastest generator supplied in this crate.
 pub struct Stc64 {
     s0: i64,
@@ -71,11 +76,13 @@ impl PseudoRandom for Stc64 {
 }
 
 impl Stc64 {
+    /// Creates a new [Stc64](Stc64) initialized with a random seed.
     #[inline]
     pub fn new() -> Self {
         Stc64::internal_new(XorShift128Plus::new().next_long())
     }
 
+    /// Creates a new [Stc64](Stc64) initialized with the given `seed`.
     #[inline]
     pub fn new_from(seed: i64) -> Self {
         Stc64::internal_new(XorShift128Plus::new_from(seed).next_long())
@@ -118,10 +125,12 @@ impl Default for Stc64 {
 /// <a href=https://arxiv.org/pdf/1805.01407.pdf>David Blackman and Sebastiano
 /// Vigna (2019)</a>. It is about 40% faster than `XorShift64Star` despite
 /// having a 4 times larger state space.
-/// <p>
+///
 /// This generator has a period of 2<sup>256</sup>&nbsp;&minus;&nbsp;1.
-/// <p>
+///
 /// This generator is 4-dimensionally equidistributed.
+///
+/// This generator is almost as fast as [Stc64](Stc64).
 pub struct XoShiRo256StarStar {
     x0: i64,
     x1: i64,
@@ -152,11 +161,13 @@ impl PseudoRandom for XoShiRo256StarStar {
 }
 
 impl XoShiRo256StarStar {
+    /// Creates a new [XoShiRo256StarStar](XoShiRo256StarStar) initialized with a random seed.
     #[inline]
     pub fn new() -> Self {
         XoShiRo256StarStar::internal_new(&mut XorShift128Plus::new())
     }
 
+    /// Creates a new [XoShiRo256StarStar](XoShiRo256StarStar) initialized with the given `seed`.
     #[inline]
     pub fn new_from(seed: i64) -> Self {
         XoShiRo256StarStar::internal_new(&mut XorShift128Plus::new_from(seed))
@@ -205,11 +216,13 @@ const M: i64 = 0xd1342543de82ef95u64 as i64;
 /// congruential generator (LCG) as a first subgenerator and a Xor-based
 /// generator (xoroshiro1024) as a second subgenerator and then applies
 /// a 64-bit mixing function identified by Doug Lea.
-/// <p>
+///
 /// This generator has a 1088-bit state and a period of
 /// 2<sup>64</sup>(2<sup>1024</sup>&minus;1).
-/// <p>
+///
 /// This generator is 16-dimensionally equidistributed.
+///
+/// This is the slowest generator supplied in this crate.
 pub struct Lcg64Xor1024Mix {
     /*
      * The parameter that is used as an additive constant for the LCG.
@@ -247,11 +260,13 @@ impl PseudoRandom for Lcg64Xor1024Mix {
 }
 
 impl Lcg64Xor1024Mix {
+    /// Creates a new [Lcg64Xor1024Mix](Lcg64Xor1024Mix) initialized with a random seed.
     #[inline]
     pub fn new() -> Self {
         Lcg64Xor1024Mix::internal_new(&mut XorShift128Plus::new())
     }
 
+    /// Creates a new [Lcg64Xor1024Mix](Lcg64Xor1024Mix) initialized with the given `seed`.
     #[inline]
     pub fn new_from(seed: i64) -> Self {
         Lcg64Xor1024Mix::internal_new(&mut XorShift128Plus::new_from(seed))

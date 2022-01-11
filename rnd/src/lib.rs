@@ -1,3 +1,5 @@
+#![crate_name="rnd"]
+
 mod bit_mix;
 pub mod pseudo_random;
 mod seed;
