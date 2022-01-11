@@ -7,7 +7,7 @@ const FLOAT_NORM: f32 = 1.0f32 / (1i32 << 24) as f32;
 
 /// A generator of uniform pseudorandom values.
 /// <p>
-/// Implementors need to supply an implementation of next_long().
+/// Implementors need to supply an implementation of the next_long() method.
 /// </p>
 /// The default implementations in this trait are efficient for methods that need
 /// at least 33 bits of randomness but somehow wasteful for the other methods because
@@ -37,8 +37,8 @@ pub trait PseudoRandom {
     }
 }
 
-/// The 256-bit generator Stc64 is Tyge Løvset's improved variation of
-/// Sfc64. See
+/// The 256-bit generator `Stc64` is Tyge Løvset's improved variation of
+/// `Sfc64`. See
 /// <https://github.com/tylov/STC/blob/master/include/stc/crandom.h>.
 /// <p>
 /// This generator has a guaranteed period of at least 2<sup>64</sup>
@@ -114,9 +114,9 @@ impl Default for Stc64 {
     }
 }
 
-/// 256-bit xoshiro256** pseudo random generator suggested by
+/// 256-bit `xoshiro256**` pseudo random generator suggested by
 /// <a href=https://arxiv.org/pdf/1805.01407.pdf>David Blackman and Sebastiano
-/// Vigna (2019)</a>. It is about 40% faster than XorShift64Star despite
+/// Vigna (2019)</a>. It is about 40% faster than `XorShift64Star` despite
 /// having a 4 times larger state space.
 /// <p>
 /// This generator has a period of 2<sup>256</sup>&nbsp;&minus;&nbsp;1.
@@ -201,7 +201,7 @@ impl Default for XoShiRo256StarStar {
  */
 const M: i64 = 0xd1342543de82ef95u64 as i64;
 
-/// The L64X1024MixRandom algorithm from JDK 17 which uses a linear
+/// The `L64X1024MixRandom` algorithm from JDK 17 which uses a linear
 /// congruential generator (LCG) as a first subgenerator and a Xor-based
 /// generator (xoroshiro1024) as a second subgenerator and then applies
 /// a 64-bit mixing function identified by Doug Lea.
