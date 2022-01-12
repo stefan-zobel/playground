@@ -1,4 +1,6 @@
-use rnd::pseudo_random::{Lcg64Xor1024Mix, PseudoRandom, Stc64, XoShiRo256StarStar};
+use rnd::pseudo_random::{
+    Lcg64Xor1024Mix, PseudoRandom, Stc64, ThreadLocalPrng, XoShiRo256StarStar,
+};
 use std::time::Instant;
 
 fn main() {
@@ -27,5 +29,13 @@ fn main() {
     }
     let millis_elapsed = start.elapsed().as_millis();
     println!("Stc64 took {} ms", millis_elapsed);
+    println!("last rand: {}", rand);
+    let mut prng4 = ThreadLocalPrng::get();
+    let start = Instant::now();
+    for _ in 0..100_000_000 {
+        rand = prng4.next_double();
+    }
+    let millis_elapsed = start.elapsed().as_millis();
+    println!("ThreadLocalPrng took {} ms", millis_elapsed);
     println!("last rand: {}", rand);
 }
