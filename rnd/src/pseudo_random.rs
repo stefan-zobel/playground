@@ -48,26 +48,6 @@ impl<'a, R: PseudoRandom + ?Sized> PseudoRandom for &'a mut R {
     fn next_long(&mut self) -> i64 {
         (**self).next_long()
     }
-
-    #[inline(always)]
-    fn next_int(&mut self) -> i32 {
-        (**self).next_int()
-    }
-
-    #[inline(always)]
-    fn next_double(&mut self) -> f64 {
-        (**self).next_double()
-    }
-
-    #[inline(always)]
-    fn next_float(&mut self) -> f32 {
-        (**self).next_float()
-    }
-
-    #[inline(always)]
-    fn next_bool(&mut self) -> bool {
-        (**self).next_bool()
-    }
 }
 
 /// Implement `PseudoRandom` for boxed references to a `PseudoRandom`.
@@ -75,26 +55,6 @@ impl<R: PseudoRandom + ?Sized> PseudoRandom for Box<R> {
     #[inline(always)]
     fn next_long(&mut self) -> i64 {
         (**self).next_long()
-    }
-
-    #[inline(always)]
-    fn next_int(&mut self) -> i32 {
-        (**self).next_int()
-    }
-
-    #[inline(always)]
-    fn next_double(&mut self) -> f64 {
-        (**self).next_double()
-    }
-
-    #[inline(always)]
-    fn next_float(&mut self) -> f32 {
-        (**self).next_float()
-    }
-
-    #[inline(always)]
-    fn next_bool(&mut self) -> bool {
-        (**self).next_bool()
     }
 }
 
