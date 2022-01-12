@@ -1,6 +1,8 @@
 use crate::bit_mix::lea_mix64;
 use crate::seed::black_hole;
 use crate::xor_shift_128plus::XorShift128Plus;
+use core::cell::UnsafeCell;
+use core::ptr::NonNull;
 
 const DOUBLE_NORM: f64 = 1.0f64 / (1i64 << 53) as f64;
 const FLOAT_NORM: f32 = 1.0f32 / (1i32 << 24) as f32;
@@ -307,5 +309,39 @@ impl Default for Lcg64Xor1024Mix {
     #[inline]
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// A thread-local generator that wraps a [Stc64](Stc64) generator.
+pub struct ThreadLocalPrng {
+    prng: NonNull<Stc64>,
+}
+
+impl PseudoRandom for ThreadLocalPrng {
+    #[inline]
+    fn next_long(&mut self) -> i64 {
+        unsafe { self.prng.as_mut().next_long() }
+    }
+}
+
+impl ThreadLocalPrng {
+    /// Get a thread-local generator that wraps a [Stc64](Stc64) generator.
+    #[inline]
+    pub fn get() -> Self {
+        let ptr = THREAD_LOCAL_PRNG_KEY.with(|t| t.get());
+        let stc64 = NonNull::new(ptr).unwrap();
+        ThreadLocalPrng { prng: stc64 }
+    }
+}
+
+thread_local!(
+    static THREAD_LOCAL_PRNG_KEY: UnsafeCell<Stc64> = {
+        UnsafeCell::new(Stc64::new())
+    }
+);
+
+impl Default for ThreadLocalPrng {
+    fn default() -> ThreadLocalPrng {
+        ThreadLocalPrng::get()
     }
 }
