@@ -342,6 +342,6 @@ thread_local!(
 
 impl Default for ThreadLocalPrng {
     fn default() -> ThreadLocalPrng {
-        ThreadLocalPrng::get()
+        Self::get()
     }
 }
