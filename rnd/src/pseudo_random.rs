@@ -1,5 +1,5 @@
 //!
-//! This module provides a few different implementations of cryptographically `insecure` random
+//! This module provides a few different implementations of cryptographically **insecure** random
 //! number generators suitable for numeric simulations.
 //!
 //! The default algorithm which is used in the thread-local generator [ThreadLocalPrng](ThreadLocalPrng) is
@@ -19,7 +19,7 @@
 //! other generators and is about 3 to 4 times slower than [Stc64](Stc64).
 //!
 //! All of these algorithms have good performance in statistical tests and so far no major issues
-//! are known. None of them is cryptographically secure. A weakness of the current implementation
+//! are known. **None** of them is cryptographically secure. A weakness of the current implementation
 //! is that all of them can only be seeded by a single `i64` which is theoretically insufficient
 //! for the state space these generators have. However, this should hardly be detectable in actual
 //! simulations.
