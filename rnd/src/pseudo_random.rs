@@ -69,6 +69,49 @@ pub trait PseudoRandom {
     fn next_bool(&mut self) -> bool {
         self.next_long() < 0i64
     }
+
+    /// Returns a uniformly distributed `i64` value between `0` (inclusive) and `n` (exclusive)
+    /// where `n` is the **strictly positive** bound on the random number to be returned.
+    /// This method panics when `n` is `<= 0`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `n` is zero or negative.
+    #[inline]
+    fn next_long_up_to(&mut self, n: i64) -> i64 {
+        if n <= 0i64 {
+            panic!("n must be strictly positive");
+        }
+        let n_minus1 = n - 1i64;
+        let mut x = self.next_long();
+        if (n & n_minus1) == 0i64 {
+            // power of two shortcut
+            return x & n_minus1;
+        }
+        // rejection-based algorithm to get uniform longs
+        let mut y = (x as u64 >> 1) as i64;
+        loop {
+            x = y % n;
+            if y + n_minus1 - x < 0i64 {
+                break;
+            }
+            y = (self.next_long() as u64 >> 1) as i64;
+        }
+
+        x
+    }
+
+    /// Returns a 64-bit floating point value which is uniformly distributed in the interval [min, max).
+    #[inline]
+    fn next_double_from_interval(&mut self, min: f64, max: f64) -> f64 {
+        min + (max - min) * self.next_double()
+    }
+
+    /// Returns a 32-bit floating point value which is uniformly distributed in the interval [min, max).
+    #[inline]
+    fn next_float_from_interval(&mut self, min: f32, max: f32) -> f32 {
+        min + (max - min) * self.next_float()
+    }
 }
 
 /// Implement `PseudoRandom` for references to a `PseudoRandom`.
