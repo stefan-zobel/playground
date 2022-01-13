@@ -120,6 +120,18 @@ pub trait PseudoRandom {
         self.next_long_up_to(n as i64) as i32
     }
 
+    /// Returns a signed 64-bit integer which is uniformly distributed in the interval [min, max].
+    #[inline]
+    fn next_long_from_interval(&mut self, min: i64, max: i64) -> i64 {
+        min + self.next_long_up_to((max - min) + 1i64)
+    }
+
+    /// Returns a signed 32-bit integer which is uniformly distributed in the interval [min, max].
+    #[inline]
+    fn next_int_from_interval(&mut self, min: i32, max: i32) -> i32 {
+        self.next_long_from_interval(min as i64, max as i64) as i32
+    }
+
     /// Returns a 64-bit floating point value which is uniformly distributed in the interval [min, max).
     #[inline]
     fn next_double_from_interval(&mut self, min: f64, max: f64) -> f64 {
