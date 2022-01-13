@@ -232,6 +232,7 @@ impl XoShiRo256StarStar {
         instance
     }
 
+    //noinspection ALL
     #[inline]
     fn escape(&mut self) {
         let mut l: i64 = 0i64;
