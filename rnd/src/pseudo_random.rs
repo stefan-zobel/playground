@@ -108,6 +108,18 @@ pub trait PseudoRandom {
         x
     }
 
+    /// Returns a uniformly distributed `i32` value between `0` (inclusive) and `n` (exclusive)
+    /// where `n` is the **strictly positive** bound on the random number to be returned.
+    /// This method panics when `n` is `<= 0`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `n` is zero or negative.
+    #[inline]
+    fn next_int_up_to(&mut self, n: i32) -> i32 {
+        self.next_long_up_to(n as i64) as i32
+    }
+
     /// Returns a 64-bit floating point value which is uniformly distributed in the interval [min, max).
     #[inline]
     fn next_double_from_interval(&mut self, min: f64, max: f64) -> f64 {
