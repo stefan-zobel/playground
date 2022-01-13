@@ -10,6 +10,7 @@
 
 #![crate_name="rnd"]
 #![warn(missing_docs)]
+#![warn(rust_2018_idioms)]
 
 mod bit_mix;
 pub mod pseudo_random;
