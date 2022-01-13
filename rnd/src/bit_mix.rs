@@ -1,3 +1,10 @@
+// Copyright 2022 Stefan Zobel
+//
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
+
 #[inline]
 pub (crate) const fn stafford_mix13(mut v: i64) -> i64 {
     v = (v ^ (v as u64 >> 30) as i64).wrapping_mul(0xbf58476d1ce4e5b9u64 as i64);
