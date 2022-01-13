@@ -1,12 +1,9 @@
 use crate::{
     bit_mix::rrxmrrxmsx, bit_mix::stafford_mix04, bit_mix::xnasam, split_mix64_seed::seed,
-    split_mix64_seed::seed_from,
+    split_mix64_seed::seed_from, split_mix64_seed::GOLDEN,
 };
 
-// the golden ratio scaled to 64 bits
-const GOLDEN: i64 = 0x9e3779b97f4a7c15u64 as i64;
-
-pub (crate) struct SplitMix64 {
+pub(crate) struct SplitMix64 {
     state: i64,
     // Weyl generator step value
     gamma: i64,
@@ -14,25 +11,25 @@ pub (crate) struct SplitMix64 {
 
 impl SplitMix64 {
     #[inline]
-    pub (crate) fn new() -> Self {
+    pub(crate) fn new() -> Self {
         SplitMix64::internal_new(seed())
     }
 
     #[allow(unused)]
     #[inline]
-    pub (crate) fn new_from(seed: i64) -> Self {
+    pub(crate) fn new_from(seed: i64) -> Self {
         SplitMix64::internal_new(seed_from(seed))
     }
 
     #[inline]
-    pub (crate) fn next_long(&mut self) -> i64 {
+    pub(crate) fn next_long(&mut self) -> i64 {
         self.state = self.state.wrapping_add(self.gamma);
         xnasam(self.state)
     }
 
     #[allow(unused)]
     #[inline]
-    pub (crate) fn next_int(&mut self) -> i32 {
+    pub(crate) fn next_int(&mut self) -> i32 {
         self.state = self.state.wrapping_add(self.gamma);
         stafford_mix04(self.state)
     }

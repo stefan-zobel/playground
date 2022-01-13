@@ -4,7 +4,7 @@ use parking_lot::{const_mutex, RawMutex};
 use std::ops::DerefMut;
 
 // the golden ratio scaled to 64 bits
-const GOLDEN: i64 = 0x9e3779b97f4a7c15u64 as i64;
+pub(crate) const GOLDEN: i64 = 0x9e3779b97f4a7c15u64 as i64;
 
 static STATE: Mutex<RawMutex, i64> = const_mutex(0i64);
 
