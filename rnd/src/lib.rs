@@ -5,7 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-//! A small library of easy-to-use `non-cryptograhic` pseudo-random
+//! A small library of easy-to-use `non-cryptographic` pseudo-random
 //! number generators ported from Java.
 
 #![crate_name="rnd"]
