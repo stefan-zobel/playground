@@ -95,6 +95,7 @@ impl<R: PseudoRandom + ?Sized> PseudoRandom for Box<R> {
 /// and an average period of 2<sup>255</sup>.
 ///
 /// This is the fastest generator supplied in this crate.
+#[derive(Debug, Clone)]
 pub struct Stc64 {
     s0: i64,
     s1: i64,
@@ -176,6 +177,7 @@ impl Default for Stc64 {
 /// This generator is 4-dimensionally equidistributed.
 ///
 /// This generator is almost as fast as [Stc64](Stc64).
+#[derive(Debug, Clone)]
 pub struct XoShiRo256StarStar {
     x0: i64,
     x1: i64,
@@ -268,6 +270,7 @@ const M: i64 = 0xd1342543de82ef95u64 as i64;
 /// This generator is 16-dimensionally equidistributed.
 ///
 /// This is the slowest generator supplied in this crate.
+#[derive(Debug, Clone)]
 pub struct Lcg64Xor1024Mix {
     /*
      * The parameter that is used as an additive constant for the LCG.
@@ -340,6 +343,7 @@ impl Default for Lcg64Xor1024Mix {
 }
 
 /// A thread-local generator that wraps a [Stc64](Stc64) generator.
+#[derive(Debug, Copy, Clone)]
 pub struct ThreadLocalPrng {
     prng: NonNull<Stc64>,
 }
