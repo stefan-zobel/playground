@@ -1,3 +1,30 @@
+//!
+//! This module provides a few different implementations of cryptographically `insecure` random
+//! number generators suitable for numeric simulations.
+//!
+//! The default algorithm which is used in the thread-local generator [ThreadLocalPrng](ThreadLocalPrng) is
+//! <a href=https://github.com/tylov/STC/blob/master/docs/crandom_api.md>Tyge Løvset's stc64 generator</a>
+//! which is implemented in [Stc64](Stc64).
+//!
+//! Another fast high quality algorithm is <a href=https://arxiv.org/pdf/1805.01407.pdf>Blackman and Vigna's (2019) xoshiro256**</a>
+//! which is provided by [XoShiRo256StarStar](XoShiRo256StarStar),
+//!
+//! For applications that use tuples of consecutively generated values, it may be desirable
+//! to use a generator that is k-dimensionally equidistributed such that k is at least as
+//! large as the length of the tuples being generated.
+//! The generator [Lcg64Xor1024Mix](Lcg64Xor1024Mix), which is a Rust port of Java's
+//! <a href=https://github.com/openjdk/jdk/blob/master/src/jdk.random/share/classes/jdk/random/L64X1024MixRandom.java>L64X1024MixRandom</a>
+//! algorithm is provably 16-dimensionally equidistributed. This generator has a much larger
+//! period (2<sup>64</sup>(2<sup>1024</sup>&minus;1)) and state space (1088 bits) than the
+//! other generators and is about 3 to 4 times slower than [Stc64](Stc64).
+//!
+//! All of these algorithms have good performance in statistical tests and so far no major issues
+//! are known. None of them is cryptographically secure. A weakness of the current implementation
+//! is that all of them can only be seeded by a single `i64` which is theoretically insufficient
+//! for the state space these generators have. However, this should hardly be detectable in actual
+//! simulations.
+//!
+
 use crate::bit_mix::lea_mix64;
 use crate::seed::black_hole;
 use crate::xor_shift_128plus::XorShift128Plus;
@@ -25,13 +52,13 @@ pub trait PseudoRandom {
         ((self.next_long() as u64 >> 32) as i64) as i32
     }
 
-    /// Returns a uniformly distributed signed 64-bit floating point value.
+    /// Returns a uniformly distributed 64-bit floating point value.
     #[inline]
     fn next_double(&mut self) -> f64 {
         ((self.next_long() as u64 >> 11) as i64) as f64 * DOUBLE_NORM
     }
 
-    /// Returns a uniformly distributed signed 32-bit floating point value.
+    /// Returns a uniformly distributed 32-bit floating point value.
     #[inline]
     fn next_float(&mut self) -> f32 {
         ((self.next_long() as u64 >> 40) as i64) as f32 * FLOAT_NORM

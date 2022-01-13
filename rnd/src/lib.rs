@@ -1,4 +1,8 @@
+//! A small library of easy-to-use `non-cryptograhic` pseudo-random
+//! number generators ported from Java.
+
 #![crate_name="rnd"]
+#![warn(missing_docs)]
 
 mod bit_mix;
 pub mod pseudo_random;
