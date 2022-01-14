@@ -176,6 +176,24 @@ pub trait PseudoRandom {
             }
         }
     }
+
+    /// Generates random signed 64-bit integers and places them into the user-supplied `longs`
+    /// slice. The number of random integers produced is equal to the length of the slice.
+    #[inline]
+    fn next_longs(&mut self, longs: &mut [i64]) {
+        for l in longs {
+            *l = self.next_long();
+        }
+    }
+
+    /// Generates random 64-bit floating point values and places them into the user-supplied
+    /// `doubles` slice. The number of random integers produced is equal to the length of the slice.
+    #[inline]
+    fn next_doubles(&mut self, doubles: &mut [f64]) {
+        for d in doubles {
+            *d = self.next_double();
+        }
+    }
 }
 
 /// Implement `PseudoRandom` for references to a `PseudoRandom`.
