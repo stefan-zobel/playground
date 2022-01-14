@@ -13,10 +13,15 @@ use std::time::Instant;
 fn main() {
     let mut rand = 0.0f64;
     let seed = 0xcb24d0a5c88c35b3u64 as i64;
-    let mut prng = Lcg64Xor1024Mix::new_from(seed);
+    let mut prng0 = ThreadLocalPrng::get();
+    let mut bytes: [u8; 9] = [0; 9];
+    prng0.next_bytes(&mut bytes);
+    println!("random bytes: {:?}", bytes);
+
+    let mut prng1 = Lcg64Xor1024Mix::new_from(seed);
     let start = Instant::now();
     for _ in 0..100_000_000 {
-        rand = prng.next_double();
+        rand = prng1.next_double();
     }
     let millis_elapsed = start.elapsed().as_millis();
     println!("Lcg64Xor1024Mix took {} ms", millis_elapsed);

@@ -151,6 +151,31 @@ pub trait PseudoRandom {
     fn next_float_from_interval(&mut self, min: f32, max: f32) -> f32 {
         min + (max - min) * self.next_float()
     }
+
+    /// Generates random bytes and places them into the user-supplied `bytes` slice.
+    /// The number of random bytes produced is equal to the length of the slice.
+    #[inline]
+    fn next_bytes(&mut self, bytes: &mut [u8]) {
+        let len = bytes.len();
+        let mut i: usize = 0usize;
+        loop {
+            if i == len {
+                break;
+            }
+            let mut rnd = self.next_long();
+            let mut n = len - i;
+            n = n.min(8);
+            loop {
+                if n == 0 {
+                    break;
+                }
+                n -= 1;
+                bytes[i] = rnd as u8;
+                i += 1;
+                rnd >>= 8;
+            }
+        }
+    }
 }
 
 /// Implement `PseudoRandom` for references to a `PseudoRandom`.
