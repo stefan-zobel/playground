@@ -194,6 +194,28 @@ pub trait PseudoRandom {
             *d = self.next_double();
         }
     }
+
+    /// Generates two standard normal distributed 64-bit floating point values and stores
+    /// them into the user-supplied `out` array. Here, "standard normal" means `N(0, 1)`, i.e.
+    /// a normal distribution with expectation `0` and variance `1`.
+    #[inline]
+    fn next_gaussians(&mut self, out: &mut [f64; 2]) {
+        // Marsaglia's polar method
+        let mut u1: f64;
+        let mut u2: f64;
+        let mut q: f64;
+        loop {
+            u1 = 2.0f64 * self.next_double() - 1.0f64; // between -1 and 1
+            u2 = 2.0f64 * self.next_double() - 1.0f64; // between -1 and 1
+            q = u1 * u1 + u2 * u2;
+            if q < 1.0f64 && q != 0.0f64 {
+                break;
+            }
+        }
+        let p = (-2.0f64 * q.ln() / q).sqrt();
+        out[0] = u1 * p;
+        out[1] = u2 * p;
+    }
 }
 
 /// Implement `PseudoRandom` for references to a `PseudoRandom`.

@@ -17,6 +17,9 @@ fn main() {
     let mut bytes: [u8; 9] = [0; 9];
     prng0.next_bytes(&mut bytes);
     println!("random bytes: {:?}", bytes);
+    let mut normal: [f64; 2] = [-99.99; 2];
+    prng0.next_gaussians(&mut normal);
+    println!("standard normal: {:?}", normal);
 
     let mut prng1 = Lcg64Xor1024Mix::new_from(seed);
     let start = Instant::now();
