@@ -38,6 +38,12 @@ impl<const ROWS: usize, const COLS: usize> Index<usize> for MatrixD<'_, { ROWS }
     }
 }
 
+impl<const ROWS: usize, const COLS: usize> IndexMut<usize> for MatrixD<'_, { ROWS }, { COLS }> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.a[index]
+    }
+}
+
 /*
 impl<const COLS: usize> Index<usize> for [f64; COLS] {
     type Output = f64;
@@ -91,7 +97,8 @@ mod matrix_tests {
         let mut m = MatrixD::<2, 3>::new();
         for row in 0..2 {
             for col in 0..3 {
-                m.test_set(row, col, i);
+                //m.test_set(row, col, i);
+                m[row][col] = i;
                 i += 1.0f64;
             }
         }
