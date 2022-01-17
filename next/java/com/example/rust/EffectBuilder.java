@@ -15,8 +15,7 @@ public final class EffectBuilder {
 
         long ret = do_add_gamepad(mNativeObj, a0);
         EffectBuilder convRet = new EffectBuilder(InternalPointerMarker.RAW_PTR, ret);
-
-        JNIReachabilityFence.reachabilityFence1(gamepad);
+        java.lang.ref.Reference.reachabilityFence(gamepad);
 
         return convRet;
     }

@@ -12,8 +12,7 @@ public final class CircularDepsB {
     public final String b(CircularDepsA a) {
         long a0 = a.mNativeObj;
         String ret = do_b(mNativeObj, a0);
-
-        JNIReachabilityFence.reachabilityFence1(a);
+        java.lang.ref.Reference.reachabilityFence(a);
 
         return ret;
     }

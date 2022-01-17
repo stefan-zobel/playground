@@ -7,8 +7,7 @@ public final class LongOperation {
     public static void do_it(DropCounter drop_counter) {
         long a0 = drop_counter.mNativeObj;
         do_do_it(a0);
-
-        JNIReachabilityFence.reachabilityFence1(drop_counter);
+        java.lang.ref.Reference.reachabilityFence(drop_counter);
     }
     private static native void do_do_it(long drop_counter);
 

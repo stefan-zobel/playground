@@ -13,24 +13,21 @@ public final class TestPassObjectsAsParams {
         long a00 = a0.mNativeObj;
         a0.mNativeObj = 0;
 
-        mNativeObj = init(a00);
-        JNIReachabilityFence.reachabilityFence1(a0);
+        mNativeObj = init(a00);        java.lang.ref.Reference.reachabilityFence(a0);
     }
     private static native long init(long a0);
 
     public final void f1(Foo a0) {
         long a00 = a0.mNativeObj;
         do_f1(mNativeObj, a00);
-
-        JNIReachabilityFence.reachabilityFence1(a0);
+        java.lang.ref.Reference.reachabilityFence(a0);
     }
     private static native void do_f1(long self, long a0);
 
     public final void f2(Foo a0) {
         long a00 = a0.mNativeObj;
         do_f2(mNativeObj, a00);
-
-        JNIReachabilityFence.reachabilityFence1(a0);
+        java.lang.ref.Reference.reachabilityFence(a0);
     }
     private static native void do_f2(long self, long a0);
 
@@ -39,8 +36,7 @@ public final class TestPassObjectsAsParams {
         a0.mNativeObj = 0;
 
         do_f3(mNativeObj, a00);
-
-        JNIReachabilityFence.reachabilityFence1(a0);
+        java.lang.ref.Reference.reachabilityFence(a0);
     }
     private static native void do_f3(long self, long a0);
 
@@ -49,8 +45,7 @@ public final class TestPassObjectsAsParams {
         a0.mNativeObj = 0;
 
         do_f_get_like_me(mNativeObj, a00);
-
-        JNIReachabilityFence.reachabilityFence1(a0);
+        java.lang.ref.Reference.reachabilityFence(a0);
     }
     private static native void do_f_get_like_me(long self, long a0);
 
@@ -71,8 +66,7 @@ public final class TestPassObjectsAsParams {
     public static String f4(Foo a0) {
         long a00 = a0.mNativeObj;
         String ret = do_f4(a00);
-
-        JNIReachabilityFence.reachabilityFence1(a0);
+        java.lang.ref.Reference.reachabilityFence(a0);
 
         return ret;
     }
@@ -81,8 +75,7 @@ public final class TestPassObjectsAsParams {
     public static String f5(int a0, String a1, Foo a2) {
         long a20 = a2.mNativeObj;
         String ret = do_f5(a0, a1, a20);
-
-        JNIReachabilityFence.reachabilityFence1(a2);
+        java.lang.ref.Reference.reachabilityFence(a2);
 
         return ret;
     }
@@ -93,8 +86,7 @@ public final class TestPassObjectsAsParams {
         a0.mNativeObj = 0;
 
         String ret = do_f6(a00);
-
-        JNIReachabilityFence.reachabilityFence1(a0);
+        java.lang.ref.Reference.reachabilityFence(a0);
 
         return ret;
     }

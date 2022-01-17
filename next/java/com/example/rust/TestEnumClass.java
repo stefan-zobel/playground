@@ -12,8 +12,7 @@ public final class TestEnumClass {
     public final int f1(MyEnum v) {
         int a0 = v.getValue();
         int ret = do_f1(mNativeObj, a0);
-
-        JNIReachabilityFence.reachabilityFence1(v);
+        java.lang.ref.Reference.reachabilityFence(v);
 
         return ret;
     }
@@ -23,8 +22,7 @@ public final class TestEnumClass {
         int a0 = v.getValue();
         int ret = do_next_enum(a0);
         MyEnum convRet = MyEnum.fromInt(ret);
-
-        JNIReachabilityFence.reachabilityFence1(v);
+        java.lang.ref.Reference.reachabilityFence(v);
 
         return convRet;
     }

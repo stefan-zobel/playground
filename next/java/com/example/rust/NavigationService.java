@@ -13,8 +13,7 @@ public final class NavigationService {
         long a0 = session.mNativeObj;
 
         do_subscribeOnUpdates(mNativeObj, a0);
-
-        JNIReachabilityFence.reachabilityFence1(session);
+        java.lang.ref.Reference.reachabilityFence(session);
     }
     private static native void do_subscribeOnUpdates(long self, long session);
 

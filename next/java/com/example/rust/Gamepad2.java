@@ -14,8 +14,7 @@ public final class Gamepad2 {
         axis.mNativeObj = 0;
 
         java.util.OptionalDouble ret = do_getID(mNativeObj, a0);
-
-        JNIReachabilityFence.reachabilityFence1(axis);
+        java.lang.ref.Reference.reachabilityFence(axis);
 
         return ret;
     }
