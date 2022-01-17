@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "next",
+    "prims",
     "rnd",
     "rwcell",
     "sync_cell",
