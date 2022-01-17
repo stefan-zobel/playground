@@ -1,3 +1,5 @@
+mod matrix;
+
 const DOUBLE_NORM: f64 = 1.0f64 / (1i64 << 53) as f64;
 
 #[derive(Debug, Clone)]
