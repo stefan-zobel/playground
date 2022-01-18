@@ -1,10 +1,5 @@
 use std::ops::{Index, IndexMut, Mul, MulAssign};
 
-enum Allocation<const ROWS: usize, const COLS: usize> {
-    //    STACK([[f64; COLS]; ROWS]),
-    HEAP(Box<[[f64; COLS]; ROWS]>),
-}
-
 struct MatrixD<const ROWS: usize, const COLS: usize> {
     rows: usize,
     cols: usize,
@@ -31,41 +26,26 @@ impl<const ROWS: usize> MulAssign<Self> for MatrixD<ROWS, ROWS> {
 impl<const ROWS: usize, const COLS: usize> Index<usize> for MatrixD<ROWS, COLS> {
     type Output = [f64; COLS];
 
+    #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         &self.a[index]
     }
 }
 
 impl<const ROWS: usize, const COLS: usize> IndexMut<usize> for MatrixD<ROWS, COLS> {
+    #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.a[index]
     }
 }
 
 impl<const ROWS: usize, const COLS: usize> MatrixD<ROWS, COLS> {
+    #[inline]
     pub fn new() -> Self {
-        if ROWS * COLS <= 19_600 {
-            // to do ...
-            return MatrixD::new_on_heap();
-        }
         MatrixD::new_on_heap()
     }
 
-    /*
-    pub fn new_on_stack() -> Self {
-        MatrixD {
-            rows: ROWS,
-            cols: COLS,
-            alloc: Allocation::STACK([[0.0f64; COLS]; ROWS]),
-        }
-    }
-    */
-
-    pub fn test(&self) {
-        let a_ = *self.a;
-        let x = a_[0][0];
-    }
-
+    #[inline]
     fn new_on_heap() -> Self {
         let slice = vec![[0.0f64; COLS]; ROWS].into_boxed_slice();
         let ptr = Box::into_raw(slice) as *mut [[f64; COLS]; ROWS];
