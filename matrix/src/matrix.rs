@@ -6,6 +6,32 @@ struct MatrixD<const ROWS: usize, const COLS: usize> {
     a: Box<[[f64; COLS]; ROWS]>,
 }
 
+// Implement `Index` for shared references to a `MatrixD`.
+impl<'a, const ROWS: usize, const COLS: usize> Index<usize> for &'a MatrixD<ROWS, COLS> {
+    type Output = [f64; COLS];
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.a[index]
+    }
+}
+
+// Implement `Index` for exclusive references to a `MatrixD`.
+impl<'a, const ROWS: usize, const COLS: usize> Index<usize> for &'a mut MatrixD<ROWS, COLS> {
+    type Output = [f64; COLS];
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.a[index]
+    }
+}
+
+// Implement `IndexMut` for references to a `MatrixD`.
+impl<'a, const ROWS: usize, const COLS: usize> IndexMut<usize> for &'a mut MatrixD<ROWS, COLS> {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.a[index]
+    }
+}
+
 impl<const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
     Mul<MatrixD<COLS_LEFT, COLS_RIGHT>> for MatrixD<ROWS_LEFT, COLS_LEFT>
 {
