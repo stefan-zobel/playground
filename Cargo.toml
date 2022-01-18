@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "matrix",
     "next",
     "prims",
     "rnd",
