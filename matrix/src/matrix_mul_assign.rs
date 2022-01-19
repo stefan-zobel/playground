@@ -1,3 +1,5 @@
+//! MulAssign implementations
+
 use crate::matrix_mul::*;
 use crate::types::*;
 use std::ops::{Add, Mul, MulAssign};
@@ -225,5 +227,32 @@ where
     fn mul_assign(&mut self, rhs: &SMatrix<T, ROWS, ROWS>) {
         let res = self.clone() * rhs;
         self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+#[cfg(test)]
+mod mul_assign_tests {
+    use super::*;
+
+    #[test]
+    fn test_mul_assign() {
+        let mut a1 = MF::<f32, 4, 4>::new_stack();
+        let a2 = MF::<f32, 4, 4>::new_stack();
+        let a3 = MF::<f32, 4, 4>::new_heap();
+        let a4 = &MF::<f32, 4, 4>::new_stack();
+        let a5 = &MF::<f32, 4, 4>::new_heap();
+        a1 *= a2;
+        a1 *= a3;
+        a1 *= a4;
+        a1 *= a5;
+        let mut b1 = MF::<f64, 8, 8>::new_heap();
+        let b2 = MF::<f64, 8, 8>::new_heap();
+        let b3 = MF::<f64, 8, 8>::new_stack();
+        let b4 = &MF::<f64, 8, 8>::new_heap();
+        let b5 = &MF::<f64, 8, 8>::new_stack();
+        b1 *= b2;
+        b1 *= b3;
+        b1 *= b4;
+        b1 *= b5;
     }
 }

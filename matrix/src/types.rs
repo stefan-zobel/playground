@@ -1,7 +1,9 @@
+//! Basic matrix arithmetic using const generics
+
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-pub(crate) trait Numeric:
+pub trait Numeric:
     Copy + Default + Add + AddAssign + Div + DivAssign + Mul + MulAssign + Neg + Sub + SubAssign
 {
 }
@@ -14,9 +16,9 @@ impl Numeric for i32 {}
 impl Numeric for i64 {}
 impl Numeric for i128 {}
 
-// Stack Matrix
+/// A Matrix allocated on the stack
 #[derive(Debug, Clone)]
-pub(crate) struct SMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
+pub struct SMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
     #[allow(unused)]
     rows: usize,
     #[allow(unused)]
@@ -24,9 +26,9 @@ pub(crate) struct SMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
     a: [[T; COLS]; ROWS],
 }
 
-// Heap Matrix
+/// A Matrix allocated on the heap
 #[derive(Debug, Clone)]
-pub(crate) struct HMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
+pub struct HMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
     #[allow(unused)]
     rows: usize,
     #[allow(unused)]

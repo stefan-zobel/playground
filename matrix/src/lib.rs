@@ -1,3 +1,5 @@
+//! Basic matrix arithmetic using const generics
+
 pub mod matrix;
 pub mod types;
 pub mod matrix_mul;

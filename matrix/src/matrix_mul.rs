@@ -1,3 +1,5 @@
+//! Mul implementations
+
 use crate::types::*;
 use std::ops::{Add, Mul};
 
