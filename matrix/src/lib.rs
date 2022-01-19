@@ -1,4 +1,6 @@
 pub mod matrix;
+pub mod types;
+pub mod matrix_mul;
 
 #[cfg(test)]
 mod tests {
