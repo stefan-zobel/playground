@@ -1,0 +1,229 @@
+use crate::matrix_mul::*;
+use crate::types::*;
+use std::ops::{Add, Mul, MulAssign};
+
+// 17) &mut SMatrix * SMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<SMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut SMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = SMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: SMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_stack();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 18) &mut SMatrix * HMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<HMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut SMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = HMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: HMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_heap();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 19) &mut SMatrix * &SMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<&SMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut SMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = SMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: &SMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_stack();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 20) &mut SMatrix * &HMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<&HMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut SMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = HMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: &HMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_heap();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 21) &mut HMatrix * HMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<HMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut HMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = HMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: HMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_heap();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 22) &mut HMatrix * &HMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<&HMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut HMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = HMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: &HMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_heap();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 23) &mut HMatrix * SMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<SMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut HMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = HMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: SMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_heap();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// 24) &mut HMatrix * &SMatrix
+impl<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
+    Mul<&SMatrix<T, COLS_LEFT, COLS_RIGHT>> for &mut HMatrix<T, ROWS_LEFT, COLS_LEFT>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    type Output = HMatrix<T, ROWS_LEFT, COLS_RIGHT>;
+
+    //noinspection ALL
+    #[inline]
+    fn mul(self, rhs: &SMatrix<T, COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+        let mut c = MF::<T, ROWS_LEFT, COLS_RIGHT>::new_heap();
+        multiply(self.array(), rhs.array(), c.array_mut());
+        c
+    }
+}
+
+// ------------------
+
+// A1) SMatrix *= SMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<Self> for SMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: Self) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// A2) SMatrix *= &SMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<&Self> for SMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: &Self) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// A3) SMatrix *= HMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<HMatrix<T, ROWS, ROWS>> for SMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: HMatrix<T, ROWS, ROWS>) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// A4) SMatrix *= &HMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<&HMatrix<T, ROWS, ROWS>> for SMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: &HMatrix<T, ROWS, ROWS>) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// B1) HMatrix *= HMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<Self> for HMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: Self) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// B2) HMatrix *= &HMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<&Self> for HMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: &Self) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// B3) HMatrix *= SMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<SMatrix<T, ROWS, ROWS>> for HMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: SMatrix<T, ROWS, ROWS>) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}
+
+// B4) HMatrix *= &SMatrix
+impl<T: Numeric, const ROWS: usize> MulAssign<&SMatrix<T, ROWS, ROWS>> for HMatrix<T, ROWS, ROWS>
+where
+    T: Mul<Output = T> + Add<Output = T>,
+{
+    fn mul_assign(&mut self, rhs: &SMatrix<T, ROWS, ROWS>) {
+        let res = self.clone() * rhs;
+        self.array_mut().copy_from_slice(res.array());
+    }
+}

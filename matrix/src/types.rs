@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use std::ops::{Add, AddAssign, Deref, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub(crate) trait Numeric:
     Copy + Default + Add + AddAssign + Div + DivAssign + Mul + MulAssign + Neg + Sub + SubAssign
@@ -17,7 +17,9 @@ impl Numeric for i128 {}
 // Stack Matrix
 #[derive(Debug, Clone)]
 pub(crate) struct SMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
+    #[allow(unused)]
     rows: usize,
+    #[allow(unused)]
     cols: usize,
     a: [[T; COLS]; ROWS],
 }
@@ -25,7 +27,9 @@ pub(crate) struct SMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
 // Heap Matrix
 #[derive(Debug, Clone)]
 pub(crate) struct HMatrix<T: Numeric, const ROWS: usize, const COLS: usize> {
+    #[allow(unused)]
     rows: usize,
+    #[allow(unused)]
     cols: usize,
     a: Box<[[T; COLS]; ROWS]>,
 }
@@ -90,7 +94,7 @@ mod types_tests {
 
     #[test]
     fn test_create() {
-        let a = MF::<f32, 4, 4>::new_stack();
-        let b = MF::<f64, 1500, 1500>::new_heap();
+        let _a = MF::<f32, 4, 4>::new_stack();
+        let _b = MF::<f64, 1500, 1500>::new_heap();
     }
 }

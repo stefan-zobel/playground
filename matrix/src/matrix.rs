@@ -1,7 +1,9 @@
 use std::ops::{Index, IndexMut, Mul, MulAssign};
 
 struct MatrixD<const ROWS: usize, const COLS: usize> {
+    #[allow(unused)]
     rows: usize,
+    #[allow(unused)]
     cols: usize,
     a: Box<[[f64; COLS]; ROWS]>,
 }
@@ -37,14 +39,14 @@ impl<const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>
 {
     type Output = MatrixD<ROWS_LEFT, COLS_RIGHT>;
 
-    fn mul(self, rhs: MatrixD<COLS_LEFT, COLS_RIGHT>) -> Self::Output {
+    fn mul(self, _rhs: MatrixD<COLS_LEFT, COLS_RIGHT>) -> Self::Output {
         // to do ...
         MatrixD::<ROWS_LEFT, COLS_RIGHT>::new()
     }
 }
 
 impl<const ROWS: usize> MulAssign<Self> for MatrixD<ROWS, ROWS> {
-    fn mul_assign(&mut self, rhs: Self) {
+    fn mul_assign(&mut self, _rhs: Self) {
         // to do ...
     }
 }
@@ -115,14 +117,14 @@ mod matrix_tests {
 
     #[test]
     fn test_one_index() {
-        let mut a = MatrixD::<10, 10>::new();
+        let a = MatrixD::<10, 10>::new();
         let row = a[0];
         println!("row = {:?}", row);
     }
 
     #[test]
     fn test_two_indices() {
-        let mut a = MatrixD::<10, 10>::new();
+        let a = MatrixD::<10, 10>::new();
         let elem = a[0][0];
         println!("a[0][0] = {}", elem);
     }

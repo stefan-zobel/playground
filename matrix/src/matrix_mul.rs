@@ -1,8 +1,8 @@
 use crate::types::*;
-use std::ops::{Add, Mul, MulAssign};
+use std::ops::{Add, Mul};
 
 #[inline]
-fn multiply<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>(
+pub(crate) fn multiply<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const COLS_RIGHT: usize>(
     a: &[[T; COLS_LEFT]; ROWS_LEFT],
     b: &[[T; COLS_RIGHT]; COLS_LEFT],
     c: &mut [[T; COLS_RIGHT]; ROWS_LEFT],
@@ -12,7 +12,7 @@ fn multiply<T: Numeric, const ROWS_LEFT: usize, const COLS_LEFT: usize, const CO
     for row_a in 0..ROWS_LEFT {
         for col_b in 0..COLS_RIGHT {
             for col_a in 0..COLS_LEFT {
-                c[row_a][col_b] = c[row_a][col_b] + a[row_a][col_a] * b[col_a][col_b];
+                c[row_a][col_b] += a[row_a][col_a] * b[col_a][col_b];
             }
         }
     }
@@ -324,5 +324,9 @@ mod mul_tests {
         let _bb = &b1 * b3.clone();
         let _bb = b1.clone() * &b3;
         let _bb = b1 * b3;
+        // ...
+        let mut c1 = MF::<f32, 4, 4>::new_stack();
+        let c2 = MF::<f32, 4, 2>::new_stack();
+        let _c = &mut c1 * c2;
     }
 }
