@@ -254,10 +254,23 @@ mod mul_assign_tests {
         b1 *= b3;
         b1 *= b4;
         b1 *= b5;
+
         /*
         let c1 = &mut MF::<f32, 4, 4>::new_stack();
         let c2 = MF::<f32, 4, 4>::new_stack();
         c1 *= c2;
+        */
+
+        /*
+        let d1 = &mut MF::<f32, 4, 4>::new_stack();
+        let d2 = MF::<f32, 4, 4>::new_stack();
+        let _d = d1 * d2;
+        let e1 = MF::<f32, 4, 4>::new_stack();
+        let e2 = &mut MF::<f32, 4, 4>::new_stack();
+        let _e = e1 * e2;
+        let f1 = &mut MF::<f32, 4, 4>::new_stack();
+        let f2 = &mut MF::<f32, 4, 4>::new_stack();
+        let _f = f1 * f2;
         */
     }
 }
