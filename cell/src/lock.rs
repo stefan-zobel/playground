@@ -6,7 +6,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops::Deref;
 
 #[derive(Debug)]
-pub(crate) struct Lock<T: ?Sized> {
+pub struct Lock<T: ?Sized> {
     owner: Owner,
     rw_lock: RwLock<T>,
 }
