@@ -79,6 +79,7 @@ impl<T> Lock<T> {
 }
 
 #[derive(Debug)]
+#[must_use]
 pub struct WriteGuard<'a, T: ?Sized> {
     lock: &'a Lock<T>,
     guard: RwLockWriteGuard<'a, RawRwLock, T>,
@@ -91,6 +92,7 @@ impl<T: ?Sized> Drop for WriteGuard<'_, T> {
 }
 
 #[derive(Debug)]
+#[must_use]
 pub struct ReadGuard<'a, T: ?Sized> {
     guard: RwLockReadGuard<'a, RawRwLock, T>,
 }

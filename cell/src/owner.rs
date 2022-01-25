@@ -59,6 +59,6 @@ impl Default for Owner {
 
 impl Debug for Owner {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.owner)
+        write!(f, "{:?}", self.owner.load(Ordering::Relaxed))
     }
 }
