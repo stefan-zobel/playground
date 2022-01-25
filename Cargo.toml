@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "cell",
     "next",
     "prims",
     "rnd",
