@@ -7,6 +7,8 @@ use std::ops::Deref;
 
 #[derive(Debug)]
 pub struct Lock<T: ?Sized> {
+    // the whole point of the `owner` field is to avoid
+    // that a writer accidentally can deadlock himself
     owner: Owner,
     rw_lock: RwLock<T>,
 }
@@ -44,6 +46,9 @@ impl<T> Lock<T> {
 
     #[inline]
     pub fn read_shared(&self) -> Result<ReadGuard<'_, T>, LockError> {
+        // avoid writer thread deadlocking itself by calling
+        // `read_shared` after having obtained an exclusive
+        // write lock
         if self.is_owned_by_current_thread() {
             return Err(LockError {});
         }
@@ -66,6 +71,8 @@ impl<T> Lock<T> {
 
     #[inline]
     pub fn write_exclusive(&self) -> Result<WriteGuard<'_, T>, LockError> {
+        // avoid writer thread deadlocking itself by calling
+        // `write_exclusive` twice in a row
         if self.is_owned_by_current_thread() {
             return Err(LockError {});
         }
