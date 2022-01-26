@@ -1,8 +1,9 @@
 
-#![allow(dead_code)]
+//#![allow(dead_code)]
 #![warn(rust_2018_idioms)]
 
 pub mod lock;
+pub mod rw_cell;
 mod owner;
 
 #[cfg(test)]
