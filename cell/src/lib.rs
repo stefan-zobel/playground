@@ -2,6 +2,7 @@
 //#![allow(dead_code)]
 #![warn(rust_2018_idioms)]
 
+pub mod arc_sync_cell;
 pub mod lock;
 pub mod rw_cell;
 mod owner;
