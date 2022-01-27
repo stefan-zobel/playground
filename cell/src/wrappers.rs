@@ -1,4 +1,4 @@
-use crate::errors::RwCellError;
+use crate::errors::CellError;
 use crate::refs::{CellRef, CellRefMut, EitherRef, EitherRefMut};
 use crate::rw_cell::RwCell;
 use std::cell::RefCell;
@@ -8,9 +8,9 @@ pub trait ReferenceCell<T> {
 
     fn try_borrow_mut(&self) -> Option<CellRefMut<'_, T>>;
 
-    fn borrow(&self) -> Result<CellRef<'_, T>, RwCellError>;
+    fn borrow(&self) -> Result<CellRef<'_, T>, CellError>;
 
-    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, RwCellError>;
+    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, CellError>;
 
     fn borrow_panic(&self) -> CellRef<'_, T>;
 
@@ -39,22 +39,22 @@ impl<T> ReferenceCell<T> for RefCell<T> {
     }
 
     #[inline]
-    fn borrow(&self) -> Result<CellRef<'_, T>, RwCellError> {
+    fn borrow(&self) -> Result<CellRef<'_, T>, CellError> {
         match self.try_borrow() {
             Ok(r) => Ok(CellRef {
                 ref_: EitherRef::Std(r),
             }),
-            Err(_) => Err(RwCellError {}),
+            Err(_) => Err(CellError {}),
         }
     }
 
     #[inline]
-    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, RwCellError> {
+    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, CellError> {
         match self.try_borrow_mut() {
             Ok(r) => Ok(CellRefMut {
                 ref_: EitherRefMut::Std(r),
             }),
-            Err(_) => Err(RwCellError {}),
+            Err(_) => Err(CellError {}),
         }
     }
 
@@ -89,7 +89,7 @@ impl<T> ReferenceCell<T> for RwCell<T> {
     }
 
     #[inline]
-    fn borrow(&self) -> Result<CellRef<'_, T>, RwCellError> {
+    fn borrow(&self) -> Result<CellRef<'_, T>, CellError> {
         match self.borrow() {
             Ok(r) => Ok(CellRef {
                 ref_: EitherRef::Locked(r),
@@ -99,7 +99,7 @@ impl<T> ReferenceCell<T> for RwCell<T> {
     }
 
     #[inline]
-    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, RwCellError> {
+    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, CellError> {
         match self.borrow_mut() {
             Ok(r) => Ok(CellRefMut {
                 ref_: EitherRefMut::Locked(r),

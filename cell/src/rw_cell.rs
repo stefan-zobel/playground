@@ -1,4 +1,4 @@
-use crate::errors::{ERR_MSG, RwCellError};
+use crate::errors::{ERR_MSG, CellError};
 use crate::lock::Lock;
 use crate::refs::{RwRef, RwRefMut};
 use std::cell::UnsafeCell;
@@ -36,18 +36,18 @@ impl<T> RwCell<T> {
     }
 
     #[inline]
-    pub fn borrow(&self) -> Result<RwRef<'_, T>, RwCellError> {
+    pub fn borrow(&self) -> Result<RwRef<'_, T>, CellError> {
         match self.lock.read_shared() {
             Ok(lock) => Ok(RwRef { guard: lock }),
-            Err(_) => Err(RwCellError {}),
+            Err(_) => Err(CellError {}),
         }
     }
 
     #[inline]
-    pub fn borrow_mut(&self) -> Result<RwRefMut<'_, T>, RwCellError> {
+    pub fn borrow_mut(&self) -> Result<RwRefMut<'_, T>, CellError> {
         match self.lock.write_exclusive() {
             Ok(lock) => Ok(RwRefMut { guard: lock }),
-            Err(_) => Err(RwCellError {}),
+            Err(_) => Err(CellError {}),
         }
     }
 

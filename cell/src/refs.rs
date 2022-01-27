@@ -90,8 +90,8 @@ impl<T> Deref for EitherRef<'_, T> {
     #[inline]
     fn deref(&self) -> &Self::Target {
         match self {
-            EitherRef::Std(a) => a.deref(),
-            EitherRef::Locked(b) => unsafe { &*b.guard.deref().get() },
+            EitherRef::Std(std) => std.deref(),
+            EitherRef::Locked(lck) => unsafe { &*lck.guard.deref().get() },
         }
     }
 }
@@ -102,8 +102,8 @@ impl<T> Deref for EitherRefMut<'_, T> {
     #[inline]
     fn deref(&self) -> &Self::Target {
         match self {
-            EitherRefMut::Std(a) => a.deref(),
-            EitherRefMut::Locked(b) => unsafe { &*b.guard.deref().get() },
+            EitherRefMut::Std(std) => std.deref(),
+            EitherRefMut::Locked(lck) => unsafe { &*lck.guard.deref().get() },
         }
     }
 }
@@ -112,8 +112,8 @@ impl<T> DerefMut for EitherRefMut<'_, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         match self {
-            EitherRefMut::Std(a) => a.deref_mut(),
-            EitherRefMut::Locked(b) => unsafe { &mut *b.guard.deref().get() },
+            EitherRefMut::Std(std) => std.deref_mut(),
+            EitherRefMut::Locked(lck) => unsafe { &mut *lck.guard.deref().get() },
         }
     }
 }
