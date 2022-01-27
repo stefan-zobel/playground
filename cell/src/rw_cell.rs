@@ -1,8 +1,8 @@
-use crate::lock::{Lock, ReadGuard, WriteGuard};
+use crate::errors::{ERR_MSG, RwCellError};
+use crate::lock::Lock;
+use crate::refs::{RwRef, RwRefMut};
 use std::cell::UnsafeCell;
-use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Deref, DerefMut};
+use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct RwCell<T: ?Sized> {
@@ -12,8 +12,6 @@ pub struct RwCell<T: ?Sized> {
 unsafe impl<T: ?Sized + Send> Send for RwCell<T> {}
 //unsafe impl<T: ?Sized + Send> Sync for RwCell<T> {} ?
 unsafe impl<T: ?Sized + Send + Sync> Sync for RwCell<T> {}
-
-const ERR_MSG: &str = "already mutably borrowed by current thread";
 
 impl<T> RwCell<T> {
     #[inline]
@@ -64,41 +62,6 @@ impl<T> RwCell<T> {
     }
 }
 
-#[derive(Debug)]
-pub struct RwRef<'scope, T: ?Sized> {
-    guard: ReadGuard<'scope, UnsafeCell<T>>,
-}
-
-impl<T> Deref for RwRef<'_, T> {
-    type Target = T;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        unsafe { &*self.guard.deref().get() }
-    }
-}
-
-#[derive(Debug)]
-pub struct RwRefMut<'scope, T: ?Sized> {
-    guard: WriteGuard<'scope, UnsafeCell<T>>,
-}
-
-impl<T> Deref for RwRefMut<'_, T> {
-    type Target = T;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        unsafe { &*self.guard.deref().get() }
-    }
-}
-
-impl<T> DerefMut for RwRefMut<'_, T> {
-    #[inline]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.guard.deref().get() }
-    }
-}
-
 impl<T> From<T> for RwCell<T> {
     #[inline]
     fn from(val: T) -> Self {
@@ -110,22 +73,6 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
     #[inline]
     fn default() -> Self {
         RwCell::new(Default::default())
-    }
-}
-
-pub struct RwCellError {}
-
-impl Error for RwCellError {}
-
-impl Debug for RwCellError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Debug::fmt("RwCellError", f)
-    }
-}
-
-impl Display for RwCellError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(ERR_MSG, f)
     }
 }
 
