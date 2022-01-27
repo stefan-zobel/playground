@@ -134,15 +134,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_as_ref() {
-        let hello = "hello world";
-        let cell = RwCell::new(String::from(hello));
-        let s = cell.as_ref();
-        assert_eq!(s, hello);
-        println!("{}", s);
-    }
-
-    #[test]
     fn test_try_borrow_mut() {
         let mut s1: &mut String = &mut String::from("not initialized");
         println!("{}", s1);
