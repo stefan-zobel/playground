@@ -177,30 +177,44 @@ impl<T> ReferenceCell<T> for RwCell<T> {
 
 #[cfg(test)]
 fn test_refcell<T: std::fmt::Debug, U: ReferenceCell<T>>(refcell: U) {
-    let cellref = refcell.try_borrow().unwrap();
-    let val = &*cellref;
+    let cell_ref = refcell.try_borrow().unwrap();
+    let val = &*cell_ref;
     println!("RefCell value : {:?}", val);
 }
 
 #[cfg(test)]
 fn test_rw_cell<T: std::fmt::Debug, U: ReferenceCell<T>>(refcell: U) {
-    let cellref = refcell.try_borrow().unwrap();
-    let val = &*cellref;
+    let cell_ref = refcell.try_borrow().unwrap();
+    let val = &*cell_ref;
+    println!("RwCell value : {:?}", val);
+}
+
+#[cfg(test)]
+fn test_refcell_by_ref<T: std::fmt::Debug, U: ReferenceCell<T>>(refcell: &U) {
+    let cell_ref = refcell.try_borrow().unwrap();
+    let val = &*cell_ref;
+    println!("RefCell value : {:?}", val);
+}
+
+#[cfg(test)]
+fn test_rw_cell_by_ref<T: std::fmt::Debug, U: ReferenceCell<T>>(refcell: &U) {
+    let cell_ref = refcell.try_borrow().unwrap();
+    let val = &*cell_ref;
     println!("RwCell value : {:?}", val);
 }
 
 #[cfg(test)]
 fn test_refcell_mut<U: ReferenceCell<i64>>(refcell: &mut U) {
-    let mut cellref = refcell.try_borrow_mut().unwrap();
-    let val = &mut *cellref;
+    let mut cell_ref = refcell.try_borrow_mut().unwrap();
+    let val = &mut *cell_ref;
     println!("RefCell value : {}", *val);
     *val = 49;
 }
 
 #[cfg(test)]
 fn test_rw_cell_mut<U: ReferenceCell<i64>>(refcell: &mut U) {
-    let mut cellref = refcell.try_borrow_mut().unwrap();
-    let val = &mut *cellref;
+    let mut cell_ref = refcell.try_borrow_mut().unwrap();
+    let val = &mut *cell_ref;
     println!("RwCell value : {:?}", *val);
     *val = 49;
 }
@@ -224,6 +238,18 @@ mod wrapper_tests {
     }
 
     #[test]
+    fn test_pass_ref_cell3() {
+        let cell = RefCell::new(42);
+        test_refcell(cell);
+    }
+
+    #[test]
+    fn test_pass_ref_cell4() {
+        let cell = RefCell::new(42);
+        test_refcell_by_ref(&cell);
+    }
+
+    #[test]
     fn test_pass_rw_cell() {
         let cell = RwCell::new(42);
         test_rw_cell(&cell);
@@ -235,5 +261,17 @@ mod wrapper_tests {
         test_rw_cell_mut(&mut cell);
         let val = cell.try_borrow().unwrap();
         println!("RwCell new value : {}", *val);
+    }
+
+    #[test]
+    fn test_pass_rw_cell3() {
+        let cell = RwCell::new(42);
+        test_rw_cell(cell);
+    }
+
+    #[test]
+    fn test_pass_rw_cell4() {
+        let cell = RwCell::new(42);
+        test_rw_cell_by_ref(&cell);
     }
 }
