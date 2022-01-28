@@ -17,6 +17,58 @@ pub trait ReferenceCell<T> {
     fn borrow_mut_panic(&self) -> CellRefMut<'_, T>;
 }
 
+impl<'a, T, R: ReferenceCell<T>> ReferenceCell<T> for &'a R {
+    fn try_borrow(&self) -> Option<CellRef<'_, T>> {
+        (**self).try_borrow()
+    }
+
+    fn try_borrow_mut(&self) -> Option<CellRefMut<'_, T>> {
+        (**self).try_borrow_mut()
+    }
+
+    fn borrow(&self) -> Result<CellRef<'_, T>, CellError> {
+        (**self).borrow()
+    }
+
+    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, CellError> {
+        (**self).borrow_mut()
+    }
+
+    fn borrow_panic(&self) -> CellRef<'_, T> {
+        (**self).borrow_panic()
+    }
+
+    fn borrow_mut_panic(&self) -> CellRefMut<'_, T> {
+        (**self).borrow_mut_panic()
+    }
+}
+
+impl<'a, T, R: ReferenceCell<T>> ReferenceCell<T> for &'a mut R {
+    fn try_borrow(&self) -> Option<CellRef<'_, T>> {
+        (**self).try_borrow()
+    }
+
+    fn try_borrow_mut(&self) -> Option<CellRefMut<'_, T>> {
+        (**self).try_borrow_mut()
+    }
+
+    fn borrow(&self) -> Result<CellRef<'_, T>, CellError> {
+        (**self).borrow()
+    }
+
+    fn borrow_mut(&self) -> Result<CellRefMut<'_, T>, CellError> {
+        (**self).borrow_mut()
+    }
+
+    fn borrow_panic(&self) -> CellRef<'_, T> {
+        (**self).borrow_panic()
+    }
+
+    fn borrow_mut_panic(&self) -> CellRefMut<'_, T> {
+        (**self).borrow_mut_panic()
+    }
+}
+
 impl<T> ReferenceCell<T> for RefCell<T> {
     #[inline]
     fn try_borrow(&self) -> Option<CellRef<'_, T>> {
@@ -120,5 +172,68 @@ impl<T> ReferenceCell<T> for RwCell<T> {
         CellRefMut {
             ref_: EitherRefMut::Locked(self.borrow_mut_panic()),
         }
+    }
+}
+
+#[cfg(test)]
+fn test_refcell<T: std::fmt::Debug, U: ReferenceCell<T>>(refcell: U) {
+    let cellref = refcell.try_borrow().unwrap();
+    let val = &*cellref;
+    println!("RefCell value : {:?}", val);
+}
+
+#[cfg(test)]
+fn test_rw_cell<T: std::fmt::Debug, U: ReferenceCell<T>>(refcell: U) {
+    let cellref = refcell.try_borrow().unwrap();
+    let val = &*cellref;
+    println!("RwCell value : {:?}", val);
+}
+
+#[cfg(test)]
+fn test_refcell_mut<U: ReferenceCell<i64>>(refcell: &mut U) {
+    let mut cellref = refcell.try_borrow_mut().unwrap();
+    let val = &mut *cellref;
+    println!("RefCell value : {}", *val);
+    *val = 49;
+}
+
+#[cfg(test)]
+fn test_rw_cell_mut<U: ReferenceCell<i64>>(refcell: &mut U) {
+    let mut cellref = refcell.try_borrow_mut().unwrap();
+    let val = &mut *cellref;
+    println!("RwCell value : {:?}", *val);
+    *val = 49;
+}
+
+#[cfg(test)]
+mod wrapper_tests {
+    use super::*;
+
+    #[test]
+    fn test_pass_ref_cell() {
+        let cell = RefCell::new(42);
+        test_refcell(&cell);
+    }
+
+    #[test]
+    fn test_pass_ref_cell2() {
+        let mut cell = RefCell::new(42);
+        test_refcell_mut(&mut cell);
+        let val = cell.try_borrow().unwrap();
+        println!("RefCell new value : {}", *val);
+    }
+
+    #[test]
+    fn test_pass_rw_cell() {
+        let cell = RwCell::new(42);
+        test_rw_cell(&cell);
+    }
+
+    #[test]
+    fn test_pass_rw_cell2() {
+        let mut cell = RwCell::new(42);
+        test_rw_cell_mut(&mut cell);
+        let val = cell.try_borrow().unwrap();
+        println!("RwCell new value : {}", *val);
     }
 }
