@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "cell",
+    "lock",
     "next",
     "prims",
     "rnd",
