@@ -1,4 +1,4 @@
-use lock::lock::{ReadGuard, WriteGuard};
+use lock::{ReadGuard, WriteGuard};
 use std::cell::{Ref, RefMut, UnsafeCell};
 use std::ops::{Deref, DerefMut};
 

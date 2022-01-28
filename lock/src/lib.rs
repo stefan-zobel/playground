@@ -1,5 +1,12 @@
-pub mod lock;
+#![warn(missing_docs)]
+#![warn(rust_2018_idioms)]
+
+mod lock;
 mod owner;
+
+pub use lock::Lock as Lock;
+pub use lock::ReadGuard as ReadGuard;
+pub use lock::WriteGuard as WriteGuard;
 
 #[cfg(test)]
 mod tests {
