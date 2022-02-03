@@ -159,6 +159,39 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub fn size(&self) -> u64 {
+        self.data.len() as u64
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        let length = self.data.len();
+        // fix the control block
+        if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CONTROL_BLOCK) {
+            *an_empty = 1usize;
+        }
+        // reset the slots
+        for i in 1usize..length {
+            let slot = &mut self.data[i];
+            match slot {
+                Slot::Empty { an_empty, .. } => {
+                    *an_empty = i + 1usize;
+                }
+                Slot::Occupied { gen, .. } => {
+                    *slot = Slot::Empty {
+                        an_empty: i + 1usize,
+                        gen: *gen + 1u32,
+                    };
+                }
+            }
+        }
+        // fix the 'an_empty' pointer in the last slot
+        if let Slot::Empty { an_empty, .. } = &mut self.data[length - 1usize] {
+            *an_empty = usize::MAX;
+        }
+    }
+
+    #[inline]
     fn init_pool(pool: &mut Pool<T>) {
         let capacity = pool.data.capacity();
         for i in 0..capacity {
@@ -222,6 +255,14 @@ impl<T> Slot<T> {
     #[inline]
     pub(crate) fn is_occupied(&self) -> bool {
         matches!(self, Slot::Occupied { .. })
+    }
+
+    #[inline]
+    pub(crate) fn generation(&self) -> u32 {
+        match self {
+            Slot::Empty { gen, .. } => *gen,
+            Slot::Occupied { gen, .. } => *gen,
+        }
     }
 
     #[inline]
@@ -378,6 +419,8 @@ mod tests {
         println!("pool: {:?}\n", pool);
         pool.grow();
         println!("pool: {:?}\n", pool);
+        pool.clear();
+        println!("Pool after clear():\n {:?}\n", pool);
     }
 
     #[test]
