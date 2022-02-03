@@ -46,10 +46,6 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn add(&mut self, value: T) -> Index {
-        // to do: check that we have sufficient capacity!!
-        // (we can do that by checking whether control.next_empty
-        //  == usize::MAX)
-        // for now, let's assume we have ...
         let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
         if let [Slot::Empty { an_empty, .. }] = control {
             let next_free_in_control = an_empty;
@@ -57,15 +53,19 @@ impl<T> Pool<T> {
             let slot = &mut rest[free_slot_index_in_slice];
             match slot {
                 Slot::Empty { an_empty, gen } => {
-                    // to do: check 'new_next_empty' that we haven't reached usize::MAX which is invalid!
                     let new_next_empty = *an_empty;
                     let next_gen = *gen;
                     let index = Index::new(*next_free_in_control as u64, next_gen);
+                    // this may write usize::MAX into the control block
                     *next_free_in_control = new_next_empty;
                     *slot = Slot::Occupied {
                         val: value,
                         gen: next_gen,
                     };
+                    // check 'new_next_empty' that we haven't reached usize::MAX which is invalid!
+                    if new_next_empty == usize::MAX {
+                        self.grow();
+                    }
                     return index;
                 }
                 Slot::Occupied { .. } => {
@@ -139,6 +139,36 @@ impl<T> Pool<T> {
         // fix the 'an_empty' pointer in the last slot
         if let Slot::Empty { an_empty, .. } = &mut pool.data[capacity - 1usize] {
             *an_empty = usize::MAX;
+        }
+    }
+
+    #[inline]
+    fn grow(&mut self) {
+        let old_capacity = self.data.capacity();
+        let new_capacity = old_capacity + (old_capacity >> 1);
+        self.data.reserve_exact(new_capacity - old_capacity);
+        let new_capacity = self.data.capacity();
+        if new_capacity > old_capacity {
+            // fix the control block if necessary
+            if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CONTROL_BLOCK) {
+                if *an_empty == usize::MAX {
+                    *an_empty = old_capacity;
+                }
+            }
+            // fix the old 'an_empty' pointer if necessary
+            if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(old_capacity - 1usize) {
+                if *an_empty == usize::MAX {
+                    *an_empty = old_capacity;
+                }
+            }
+            // initialize the additional slots
+            for i in old_capacity..new_capacity {
+                self.data.push(Slot::initial_empty(i + 1usize));
+            }
+            // fix the 'an_empty' pointer in the last slot
+            if let Slot::Empty { an_empty, .. } = &mut self.data[new_capacity - 1usize] {
+                *an_empty = usize::MAX;
+            }
         }
     }
 }
@@ -313,5 +343,30 @@ mod tests {
         assert_eq!(1, index.index());
         println!("new Index: {}", index);
         println!("pool: {:?}\n", pool);
+        pool.grow();
+        println!("pool: {:?}\n", pool);
+    }
+
+    #[test]
+    fn test_resize() {
+        let mut pool = Pool::<i32>::new();
+        // add entries from 1 to 14, last slot remains empty
+        for i in 1..15 {
+            pool.add(i);
+        }
+        println!("Pool after first insert round:\n {:?}\n", pool);
+        // use up the last slot (store 15 in index 15)
+        pool.add(15);
+        println!("Pool after additional insert:\n {:?}\n", pool);
+        // add 8 more from 16 to 23
+        for i in 16..24 {
+            pool.add(i);
+        }
+        println!("Pool after second insert round:\n {:?}\n", pool);
+        assert_eq!(36, pool.data.capacity());
+        assert_eq!(36, pool.data.len());
+        // add 24 to slot 24
+        pool.add(24);
+        println!("Pool after additional insert:\n {:?}\n", pool);
     }
 }
