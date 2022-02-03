@@ -51,21 +51,14 @@ impl<T> Pool<T> {
         //  == usize::MAX)
         // for now, let's assume we have ...
         let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
-        if let [Slot::Empty {
-            an_empty: next_empty,
-            ..
-        }] = control
-        {
-            let next_free_in_control = next_empty;
+        if let [Slot::Empty { an_empty, .. }] = control {
+            let next_free_in_control = an_empty;
             let free_slot_index_in_slice = *next_free_in_control - 1usize;
             let slot = &mut rest[free_slot_index_in_slice];
             match slot {
-                Slot::Empty {
-                    an_empty: next_empty,
-                    gen,
-                } => {
+                Slot::Empty { an_empty, gen } => {
                     // to do: check 'new_next_empty' that we haven't reached usize::MAX which is invalid!
-                    let new_next_empty = *next_empty;
+                    let new_next_empty = *an_empty;
                     let next_gen = *gen;
                     let index = Index::new(*next_free_in_control as u64, next_gen);
                     *next_free_in_control = new_next_empty;
@@ -87,12 +80,8 @@ impl<T> Pool<T> {
     pub(crate) fn remove(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
             let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
-            if let [Slot::Empty {
-                an_empty: next_empty,
-                ..
-            }] = control
-            {
-                let next_free_in_control = next_empty;
+            if let [Slot::Empty { an_empty, .. }] = control {
+                let next_free_in_control = an_empty;
                 let occupied_slot_index_in_slice = pos - 1usize;
                 let slot = &mut rest[occupied_slot_index_in_slice];
                 match slot {
@@ -120,12 +109,8 @@ impl<T> Pool<T> {
             pool.data.push(Slot::initial_empty(i + 1usize));
         }
         // fix the 'an_empty' pointer in the last slot
-        if let Slot::Empty {
-            an_empty: next_empty,
-            ..
-        } = &mut pool.data[capacity - 1usize]
-        {
-            *next_empty = usize::MAX;
+        if let Slot::Empty { an_empty, .. } = &mut pool.data[capacity - 1usize] {
+            *an_empty = usize::MAX;
         }
     }
 }
