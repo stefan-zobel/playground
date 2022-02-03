@@ -207,6 +207,9 @@ impl<T> Pool<T> {
     fn grow(&mut self) {
         let old_capacity = self.data.capacity();
         let new_capacity = old_capacity + (old_capacity >> 1);
+        if new_capacity > SLOT_INDEX_BITS as usize + 1usize {
+            panic!("capacity overflow: {}", new_capacity);
+        }
         self.data.reserve_exact(new_capacity - old_capacity);
         let new_capacity = self.data.capacity();
         if new_capacity > old_capacity {
