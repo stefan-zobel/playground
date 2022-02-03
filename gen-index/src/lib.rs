@@ -73,7 +73,7 @@ impl<T> Pool<T> {
     }
 
     #[inline]
-    pub(crate) fn remove(&mut self, pos: usize) {
+    pub(crate) fn remove_by_pos(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
             let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
             if let [Slot::Empty { an_empty, .. }] = control {
@@ -91,6 +91,33 @@ impl<T> Pool<T> {
                     Slot::Empty { .. } => {
                         panic!("index {} is already empty!", pos);
                     }
+                }
+            } else {
+                panic!("control block is not empty!");
+            }
+        }
+    }
+
+    #[inline]
+    pub fn remove(&mut self, index: Index) {
+        let pos = index.index();
+        if pos > 0 && pos < self.data.len() {
+            let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
+            if let [Slot::Empty { an_empty, .. }] = control {
+                let next_free_in_control = an_empty;
+                let occupied_slot_index_in_slice = pos - 1usize;
+                let slot = &mut rest[occupied_slot_index_in_slice];
+                match slot {
+                    Slot::Occupied { gen, .. } => {
+                        if *gen == index.generation() {
+                            *slot = Slot::Empty {
+                                an_empty: *next_free_in_control,
+                                gen: *gen + 1u32,
+                            };
+                            *next_free_in_control = pos as usize;
+                        }
+                    }
+                    Slot::Empty { .. } => {}
                 }
             } else {
                 panic!("control block is not empty!");
@@ -227,7 +254,7 @@ impl<T> Slot<T> {
     }
 }
 
-// 36 bits for the index, 28 bits for the generation
+/// An `Index` reserves 36 bits for the position, 28 bits for the generation.
 #[derive(Clone, Copy, Debug)]
 pub struct Index {
     id: u64,
@@ -249,6 +276,11 @@ impl Index {
         let id = (idx & ENTITY_INDEX_MASK)
             | (((gen & ENTITY_GENERATION_MASK) as u64) << (64 - ENTITY_GENERATION_BITS));
         Index { id }
+    }
+
+    #[inline]
+    pub fn parts(&self) -> (u64, u32) {
+        (self.index(), self.generation())
     }
 }
 
@@ -301,10 +333,10 @@ mod tests {
         println!("new Index: {}", index);
         assert_eq!(2, index.index());
         println!("pool: {:?}\n", pool);
-        pool.remove(0);
-        pool.remove(16);
+        pool.remove_by_pos(0);
+        pool.remove_by_pos(16);
         // remove 42, gen=0 from 1
-        pool.remove(1);
+        pool.remove_by_pos(1);
         println!("pool: {:?}\n", pool);
         // add 51, gen=1 at 1
         let elem = 51i32;
@@ -313,7 +345,7 @@ mod tests {
         assert_eq!(1, index.index());
         println!("new Index: {}", index);
         // remove 49, gen=0 from 2
-        pool.remove(2);
+        pool.remove_by_pos(2);
         println!("pool: {:?}\n", pool);
         // add 53, gen=1 at 2
         let elem = 53i32;
@@ -322,10 +354,10 @@ mod tests {
         println!("new Index: {}", index);
         println!("pool: {:?}\n", pool);
         // remove 51, gen=1 from 1
-        pool.remove(1);
+        pool.remove_by_pos(1);
         println!("pool: {:?}\n", pool);
         // remove 53, gen=1 from 2
-        pool.remove(2);
+        pool.remove_by_pos(2);
         println!("pool: {:?}\n", pool);
         // add 66, gen=2 at 2
         let elem = 66i32;
