@@ -8,6 +8,7 @@ const ENTITY_INDEX_MASK: u64 = (1 << ENTITY_INDEX_BITS) - 1;
 const ENTITY_GENERATION_BITS: u32 = 28;
 const ENTITY_GENERATION_MASK: u32 = (1 << ENTITY_GENERATION_BITS) - 1;
 
+const CONTROL_BLOCK: usize = 0usize;
 const DEFAULT_CAPACITY: usize = 16usize;
 
 #[derive(Debug)]
@@ -43,16 +44,48 @@ impl<T> Pool<T> {
         pool
     }
 
+    pub fn add(&mut self, value: T) {
+        // to do: check that we have sufficient capacity!!
+        // for now, let's assume we have ...
+        let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
+        if let [Slot::Empty { next_empty, .. }] = control {
+            let next_free_in_control = next_empty;
+            let free_slot_index_in_slice = *next_free_in_control - 1usize;
+            let slot = &mut rest[free_slot_index_in_slice];
+            match slot {
+                Slot::Empty { next_empty, gen } => {
+                    let new_next_empty = *next_empty;
+                    // to do: check 'next_gen' that we haven't reached usize::MAX which is invalid!
+                    let next_gen = *gen;
+                    *next_free_in_control = new_next_empty;
+                    *slot = Slot::Occupied {
+                        val: value,
+                        gen: next_gen,
+                    };
+                }
+                Slot::Occupied { .. } => {
+                    panic!("index {} is already occupied!", *next_free_in_control);
+                }
+            }
+        }
+    }
+
     #[inline]
     fn init_pool(pool: &mut Pool<T>) {
         let capacity = pool.data.capacity();
         for i in 0..capacity {
-            pool.data.push(Slot::initial_empty(i + 1));
+            pool.data.push(Slot::initial_empty(i + 1usize));
         }
-        // fix the last next_empty pointer
-        if let Some(Slot::Empty { next_empty, .. }) = pool.data.get_mut(capacity - 1) {
+        // fix the 'next_empty' pointer in the last slot
+        if let Slot::Empty { next_empty, .. } = &mut pool.data[capacity - 1usize] {
             *next_empty = usize::MAX;
         }
+    }
+}
+
+impl<T> Default for Pool<T> {
+    fn default() -> Self {
+        Pool::new()
     }
 }
 
@@ -167,8 +200,14 @@ mod tests {
     }
 
     #[test]
-    fn test_create_pool() {
-        let pool = Pool::<i32>::new();
-        println!("pool: {:?}", pool);
+    fn test_create_pool_and_add() {
+        let mut pool = Pool::<i32>::new();
+        println!("pool: {:?}\n", pool);
+        let elem = 42i32;
+        pool.add(elem);
+        println!("pool: {:?}\n", pool);
+        let elem = 49i32;
+        pool.add(elem);
+        println!("pool: {:?}\n", pool);
     }
 }
