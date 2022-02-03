@@ -44,18 +44,28 @@ impl<T> Pool<T> {
         pool
     }
 
+    #[inline]
     pub fn add(&mut self, value: T) -> Index {
         // to do: check that we have sufficient capacity!!
+        // (we can do that by checking whether control.next_empty
+        //  == usize::MAX)
         // for now, let's assume we have ...
         let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
-        if let [Slot::Empty { next_empty, .. }] = control {
+        if let [Slot::Empty {
+            an_empty: next_empty,
+            ..
+        }] = control
+        {
             let next_free_in_control = next_empty;
             let free_slot_index_in_slice = *next_free_in_control - 1usize;
             let slot = &mut rest[free_slot_index_in_slice];
             match slot {
-                Slot::Empty { next_empty, gen } => {
+                Slot::Empty {
+                    an_empty: next_empty,
+                    gen,
+                } => {
+                    // to do: check 'new_next_empty' that we haven't reached usize::MAX which is invalid!
                     let new_next_empty = *next_empty;
-                    // to do: check 'next_gen' that we haven't reached usize::MAX which is invalid!
                     let next_gen = *gen;
                     let index = Index::new(*next_free_in_control as u64, next_gen);
                     *next_free_in_control = new_next_empty;
@@ -74,13 +84,47 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub(crate) fn remove(&mut self, pos: usize) {
+        if pos > 0 && pos < self.data.len() {
+            let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
+            if let [Slot::Empty {
+                an_empty: next_empty,
+                ..
+            }] = control
+            {
+                let next_free_in_control = next_empty;
+                let occupied_slot_index_in_slice = pos - 1usize;
+                let slot = &mut rest[occupied_slot_index_in_slice];
+                match slot {
+                    Slot::Occupied { gen, .. } => {
+                        *slot = Slot::Empty {
+                            an_empty: *next_free_in_control,
+                            gen: *gen + 1u32,
+                        };
+                        *next_free_in_control = pos;
+                    }
+                    Slot::Empty { .. } => {
+                        panic!("index {} is already empty!", pos);
+                    }
+                }
+            } else {
+                panic!("control block is not empty!");
+            }
+        }
+    }
+
+    #[inline]
     fn init_pool(pool: &mut Pool<T>) {
         let capacity = pool.data.capacity();
         for i in 0..capacity {
             pool.data.push(Slot::initial_empty(i + 1usize));
         }
-        // fix the 'next_empty' pointer in the last slot
-        if let Slot::Empty { next_empty, .. } = &mut pool.data[capacity - 1usize] {
+        // fix the 'an_empty' pointer in the last slot
+        if let Slot::Empty {
+            an_empty: next_empty,
+            ..
+        } = &mut pool.data[capacity - 1usize]
+        {
             *next_empty = usize::MAX;
         }
     }
@@ -94,7 +138,7 @@ impl<T> Default for Pool<T> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Slot<T> {
-    Empty { next_empty: usize, gen: u32 },
+    Empty { an_empty: usize, gen: u32 },
     Occupied { val: T, gen: u32 },
 }
 
@@ -133,7 +177,7 @@ impl<T> Slot<T> {
     #[inline]
     pub(crate) fn new_empty(next_free: usize, gen: u32) -> Self {
         Slot::Empty {
-            next_empty: next_free,
+            an_empty: next_free,
             gen,
         }
     }
@@ -203,18 +247,58 @@ mod tests {
     }
 
     #[test]
-    fn test_create_pool_and_add() {
+    fn test_create_pool_then_add_and_remove() {
         let mut pool = Pool::<i32>::new();
         println!("pool: {:?}\n", pool);
+        // add 42, gen=0 at 1
         let elem = 42i32;
         let index = pool.add(elem);
         println!("new Index: {}", index);
         assert_eq!(1, index.index());
         println!("pool: {:?}\n", pool);
+        // add 49, gen=0 at 2
         let elem = 49i32;
         let index = pool.add(elem);
         println!("new Index: {}", index);
         assert_eq!(2, index.index());
+        println!("pool: {:?}\n", pool);
+        pool.remove(0);
+        pool.remove(16);
+        // remove 42, gen=0 from 1
+        pool.remove(1);
+        println!("pool: {:?}\n", pool);
+        // add 51, gen=1 at 1
+        let elem = 51i32;
+        let index = pool.add(elem);
+        println!("pool: {:?}\n", pool);
+        assert_eq!(1, index.index());
+        println!("new Index: {}", index);
+        // remove 49, gen=0 from 2
+        pool.remove(2);
+        println!("pool: {:?}\n", pool);
+        // add 53, gen=1 at 2
+        let elem = 53i32;
+        let index = pool.add(elem);
+        assert_eq!(2, index.index());
+        println!("new Index: {}", index);
+        println!("pool: {:?}\n", pool);
+        // remove 51, gen=1 from 1
+        pool.remove(1);
+        println!("pool: {:?}\n", pool);
+        // remove 53, gen=1 from 2
+        pool.remove(2);
+        println!("pool: {:?}\n", pool);
+        // add 66, gen=2 at 2
+        let elem = 66i32;
+        let index = pool.add(elem);
+        assert_eq!(2, index.index());
+        println!("new Index: {}", index);
+        println!("pool: {:?}\n", pool);
+        // add 77, gen=2 at 1
+        let elem = 77i32;
+        let index = pool.add(elem);
+        assert_eq!(1, index.index());
+        println!("new Index: {}", index);
         println!("pool: {:?}\n", pool);
     }
 }
