@@ -2,11 +2,11 @@
 
 use std::fmt::{Display, Formatter};
 
-const ENTITY_INDEX_BITS: u64 = 36;
-const ENTITY_INDEX_MASK: u64 = (1 << ENTITY_INDEX_BITS) - 1;
+const SLOT_INDEX_BITS: u64 = 36;
+const SLOT_INDEX_MASK: u64 = (1 << SLOT_INDEX_BITS) - 1;
 
-const ENTITY_GENERATION_BITS: u32 = 28;
-const ENTITY_GENERATION_MASK: u32 = (1 << ENTITY_GENERATION_BITS) - 1;
+const SLOT_GENERATION_BITS: u32 = 28;
+const SLOT_GENERATION_MASK: u32 = (1 << SLOT_GENERATION_BITS) - 1;
 
 const CONTROL_BLOCK: usize = 0usize;
 const DEFAULT_CAPACITY: usize = 16usize;
@@ -27,7 +27,7 @@ impl<T> Pool<T> {
         let capacity = {
             if capacity <= DEFAULT_CAPACITY {
                 DEFAULT_CAPACITY
-            } else if capacity > ENTITY_INDEX_BITS as usize + 1usize {
+            } else if capacity > SLOT_INDEX_BITS as usize + 1usize {
                 panic!("capacity overflow: {}", capacity)
             } else {
                 capacity
@@ -309,18 +309,18 @@ pub struct Index {
 impl Index {
     #[inline]
     pub fn index(&self) -> u64 {
-        self.id & ENTITY_INDEX_MASK
+        self.id & SLOT_INDEX_MASK
     }
 
     #[inline]
     pub fn generation(&self) -> u32 {
-        (self.id >> ENTITY_INDEX_BITS) as u32 & ENTITY_GENERATION_MASK
+        (self.id >> SLOT_INDEX_BITS) as u32 & SLOT_GENERATION_MASK
     }
 
     #[inline]
     pub fn new(idx: u64, gen: u32) -> Self {
-        let id = (idx & ENTITY_INDEX_MASK)
-            | (((gen & ENTITY_GENERATION_MASK) as u64) << (64 - ENTITY_GENERATION_BITS));
+        let id = (idx & SLOT_INDEX_MASK)
+            | (((gen & SLOT_GENERATION_MASK) as u64) << (64 - SLOT_GENERATION_BITS));
         Index { id }
     }
 
@@ -348,11 +348,11 @@ mod tests {
         println!("size: {}", size1);
         println!(
             "ENTITY_INDEX_MASK: {}",
-            format!("{:#16x}", ENTITY_INDEX_MASK)
+            format!("{:#16x}", SLOT_INDEX_MASK)
         );
         println!(
             "ENTITY_GENERATION_MASK: {}",
-            format!("{:#8x}", ENTITY_GENERATION_MASK)
+            format!("{:#8x}", SLOT_GENERATION_MASK)
         );
     }
 
