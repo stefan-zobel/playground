@@ -107,24 +107,21 @@ impl<T> Pool<T> {
                 let next_free_in_control = an_empty;
                 let occupied_slot_index_in_slice = pos - 1usize;
                 let slot = &mut rest[occupied_slot_index_in_slice];
-                match slot {
-                    Slot::Occupied { gen, .. } => {
-                        if *gen == index.generation() {
-                            let next_gen = *gen + 1u32;
-                            let old = std::mem::replace(
-                                slot,
-                                Slot::Empty {
-                                    an_empty: *next_free_in_control,
-                                    gen: next_gen,
-                                },
-                            );
-                            *next_free_in_control = pos;
-                            if let Slot::Occupied { val, .. } = old {
-                                return Some(val);
-                            }
+                if let Slot::Occupied { gen, .. } = slot {
+                    if *gen == index.generation() {
+                        let next_gen = *gen + 1u32;
+                        let old = std::mem::replace(
+                            slot,
+                            Slot::Empty {
+                                an_empty: *next_free_in_control,
+                                gen: next_gen,
+                            },
+                        );
+                        *next_free_in_control = pos;
+                        if let Slot::Occupied { val, .. } = old {
+                            return Some(val);
                         }
                     }
-                    Slot::Empty { .. } => {}
                 }
             } else {
                 panic!("control block is not empty!");
