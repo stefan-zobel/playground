@@ -103,6 +103,34 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub fn get(&self, index: Index) -> Option<&T> {
+        let pos = index.index() as usize;
+        let version = index.generation();
+        if pos > 0 && pos < self.data.len() {
+            if let Slot::Occupied { val, gen } = &self.data[pos] {
+                if *gen == version {
+                    return Some(val);
+                }
+            }
+        }
+        None
+    }
+
+    #[inline]
+    pub fn get_mut(&mut self, index: Index) -> Option<&mut T> {
+        let pos = index.index() as usize;
+        let version = index.generation();
+        if pos > 0 && pos < self.data.len() {
+            if let Slot::Occupied { val, gen } = self.data.get_mut(pos)? {
+                if *gen == version {
+                    return Some(val);
+                }
+            }
+        }
+        None
+    }
+
+    #[inline]
     fn init_pool(pool: &mut Pool<T>) {
         let capacity = pool.data.capacity();
         for i in 0..capacity {
