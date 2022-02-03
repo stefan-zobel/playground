@@ -99,8 +99,8 @@ impl<T> Pool<T> {
     }
 
     #[inline]
-    pub fn remove(&mut self, index: Index) {
-        let pos = index.index();
+    pub fn remove(&mut self, index: Index) -> Option<T> {
+        let pos = index.index() as usize;
         if pos > 0 && pos < self.data.len() {
             let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
             if let [Slot::Empty { an_empty, .. }] = control {
@@ -110,11 +110,18 @@ impl<T> Pool<T> {
                 match slot {
                     Slot::Occupied { gen, .. } => {
                         if *gen == index.generation() {
-                            *slot = Slot::Empty {
-                                an_empty: *next_free_in_control,
-                                gen: *gen + 1u32,
-                            };
-                            *next_free_in_control = pos as usize;
+                            let next_gen = *gen + 1u32;
+                            let old = std::mem::replace(
+                                slot,
+                                Slot::Empty {
+                                    an_empty: *next_free_in_control,
+                                    gen: next_gen,
+                                },
+                            );
+                            *next_free_in_control = pos;
+                            if let Slot::Occupied { val, .. } = old {
+                                return Some(val);
+                            }
                         }
                     }
                     Slot::Empty { .. } => {}
@@ -123,6 +130,7 @@ impl<T> Pool<T> {
                 panic!("control block is not empty!");
             }
         }
+        None
     }
 
     #[inline]
@@ -318,7 +326,7 @@ mod tests {
     }
 
     #[test]
-    fn test_create_pool_then_add_and_remove() {
+    fn test_create_pool_then_add_and_remove_by_pos() {
         let mut pool = Pool::<i32>::new();
         println!("pool: {:?}\n", pool);
         // add 42, gen=0 at 1
@@ -396,5 +404,14 @@ mod tests {
         // add 24 to slot 24
         pool.add(24);
         println!("Pool after additional insert:\n {:?}\n", pool);
+    }
+
+    #[test]
+    fn test_remove() {
+        let mut pool = Pool::<i32>::new();
+        let idx = pool.add(15);
+        let val = pool.remove(idx);
+        println!("got back : {:?}", val);
+        println!("Pool after removal:\n {:?}\n", pool);
     }
 }
