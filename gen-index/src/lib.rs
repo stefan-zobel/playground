@@ -19,11 +19,7 @@ pub struct Pool<T> {
 impl<T> Pool<T> {
     #[inline]
     pub fn new() -> Self {
-        let mut pool = Pool {
-            data: Vec::<Slot<T>>::with_capacity(DEFAULT_CAPACITY),
-        };
-        Pool::init_pool(&mut pool);
-        pool
+        Pool::with_capacity(DEFAULT_CAPACITY)
     }
 
     #[inline]
