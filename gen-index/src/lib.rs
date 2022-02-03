@@ -44,7 +44,7 @@ impl<T> Pool<T> {
         pool
     }
 
-    pub fn add(&mut self, value: T) {
+    pub fn add(&mut self, value: T) -> Index {
         // to do: check that we have sufficient capacity!!
         // for now, let's assume we have ...
         let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
@@ -57,17 +57,20 @@ impl<T> Pool<T> {
                     let new_next_empty = *next_empty;
                     // to do: check 'next_gen' that we haven't reached usize::MAX which is invalid!
                     let next_gen = *gen;
+                    let index = Index::new(*next_free_in_control as u64, next_gen);
                     *next_free_in_control = new_next_empty;
                     *slot = Slot::Occupied {
                         val: value,
                         gen: next_gen,
                     };
+                    return index;
                 }
                 Slot::Occupied { .. } => {
                     panic!("index {} is already occupied!", *next_free_in_control);
                 }
             }
         }
+        panic!("control block is not empty!");
     }
 
     #[inline]
@@ -204,10 +207,14 @@ mod tests {
         let mut pool = Pool::<i32>::new();
         println!("pool: {:?}\n", pool);
         let elem = 42i32;
-        pool.add(elem);
+        let index = pool.add(elem);
+        println!("new Index: {}", index);
+        assert_eq!(1, index.index());
         println!("pool: {:?}\n", pool);
         let elem = 49i32;
-        pool.add(elem);
+        let index = pool.add(elem);
+        println!("new Index: {}", index);
+        assert_eq!(2, index.index());
         println!("pool: {:?}\n", pool);
     }
 }
