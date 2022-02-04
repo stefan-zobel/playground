@@ -301,7 +301,7 @@ impl Index {
     }
 
     #[inline]
-    pub fn new(idx: u64, gen: u32) -> Self {
+    pub(crate) fn new(idx: u64, gen: u32) -> Self {
         let id = (idx & SLOT_INDEX_MASK)
             | (((gen & SLOT_GENERATION_MASK) as u64) << (64 - SLOT_GENERATION_BITS));
         Index { id }
