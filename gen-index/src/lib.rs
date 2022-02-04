@@ -209,9 +209,7 @@ impl<T> Pool<T> {
                 self.data.push(Slot::initial_empty(i + 1usize));
             }
             // fix the 'an_empty' pointer in the last slot
-            if let Slot::Empty { an_empty, .. } = &mut self.data[new_capacity - 1usize] {
-                *an_empty = usize::MAX;
-            }
+            self.fix_slot_pointer(new_capacity - 1usize, usize::MAX, true);
         }
     }
 
