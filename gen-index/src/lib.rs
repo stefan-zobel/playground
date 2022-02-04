@@ -123,8 +123,7 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn get(&self, index: Index) -> Option<&T> {
-        let pos = index.index() as usize;
-        let version = index.generation();
+        let (pos, version) = index.parts();
         if pos > 0 && pos < self.data.len() {
             if let Slot::Taken { val, gen } = &self.data[pos] {
                 if *gen == version {
@@ -137,8 +136,7 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn get_mut(&mut self, index: Index) -> Option<&mut T> {
-        let pos = index.index() as usize;
-        let version = index.generation();
+        let (pos, version) = index.parts();
         if pos > 0 && pos < self.data.len() {
             if let Slot::Taken { val, gen } = self.data.get_mut(pos)? {
                 if *gen == version {
@@ -216,9 +214,7 @@ impl<T> Pool<T> {
     #[inline]
     fn fix_slot_pointer(&mut self, position: usize, new_empty: usize, unconditionally: bool) {
         if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(position) {
-            if unconditionally {
-                *an_empty = new_empty;
-            } else if *an_empty == usize::MAX {
+            if unconditionally || *an_empty == usize::MAX {
                 *an_empty = new_empty;
             }
         }
@@ -317,8 +313,8 @@ impl Index {
     }
 
     #[inline]
-    pub fn parts(&self) -> (u64, u32) {
-        (self.index(), self.generation())
+    pub fn parts(&self) -> (usize, u32) {
+        (self.index() as usize, self.generation())
     }
 }
 
