@@ -149,7 +149,7 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn size(&self) -> u64 {
-        self.data.len() as u64
+        (self.data.len() - 1usize) as u64
     }
 
     #[inline]
