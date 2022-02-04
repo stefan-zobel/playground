@@ -8,7 +8,7 @@ const SLOT_INDEX_MASK: u64 = (1 << SLOT_INDEX_BITS) - 1;
 const SLOT_GENERATION_BITS: u32 = 28;
 const SLOT_GENERATION_MASK: u32 = (1 << SLOT_GENERATION_BITS) - 1;
 
-const CONTROL_BLOCK: usize = 0usize;
+const CTRL_BLOCK_IDX: usize = 0usize;
 const DEFAULT_CAPACITY: usize = 16usize;
 
 #[derive(Debug)]
@@ -42,7 +42,7 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn add(&mut self, value: T) -> Index {
-        let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
+        let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + 1usize);
         if let [Slot::Empty { an_empty, .. }] = control {
             let next_free_in_control = an_empty;
             let free_slot_index_in_slice = *next_free_in_control - 1usize;
@@ -58,7 +58,7 @@ impl<T> Pool<T> {
                         val: value,
                         gen: next_gen,
                     };
-                    // check 'new_next_empty' that we haven't reached usize::MAX which is invalid!
+                    // check 'new_next_empty' that we haven't reached usize::MAX which is invalid
                     if new_next_empty == usize::MAX {
                         self.grow();
                     }
@@ -75,7 +75,7 @@ impl<T> Pool<T> {
     #[inline]
     pub(crate) fn remove_by_pos(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
-            let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
+            let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + 1usize);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
                 let occupied_slot_index_in_slice = pos - 1usize;
@@ -102,7 +102,7 @@ impl<T> Pool<T> {
     pub fn remove(&mut self, index: Index) -> Option<T> {
         let pos = index.index() as usize;
         if pos > 0 && pos < self.data.len() {
-            let (control, rest) = self.data.split_at_mut(CONTROL_BLOCK + 1usize);
+            let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + 1usize);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
                 let occupied_slot_index_in_slice = pos - 1usize;
@@ -167,7 +167,7 @@ impl<T> Pool<T> {
     pub fn clear(&mut self) {
         let length = self.data.len();
         // fix the control block
-        if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CONTROL_BLOCK) {
+        if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CTRL_BLOCK_IDX) {
             *an_empty = 1usize;
         }
         // reset the slots
@@ -214,7 +214,7 @@ impl<T> Pool<T> {
         let new_capacity = self.data.capacity();
         if new_capacity > old_capacity {
             // fix the control block if necessary
-            if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CONTROL_BLOCK) {
+            if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CTRL_BLOCK_IDX) {
                 if *an_empty == usize::MAX {
                     *an_empty = old_capacity;
                 }
