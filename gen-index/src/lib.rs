@@ -236,7 +236,7 @@ impl<T> Slot<T> {
     }
 
     #[inline]
-    pub(crate) fn is_occupied(&self) -> bool {
+    pub(crate) fn is_taken(&self) -> bool {
         matches!(self, Slot::Taken { .. })
     }
 
