@@ -26,11 +26,11 @@ impl<T> Pool<T> {
     pub fn with_capacity(capacity: usize) -> Self {
         let capacity = {
             if capacity <= DEFAULT_CAPACITY {
-                DEFAULT_CAPACITY
+                DEFAULT_CAPACITY + 1usize
             } else if capacity > SLOT_INDEX_BITS as usize + 1usize {
                 panic!("capacity overflow: {}", capacity)
             } else {
-                capacity
+                capacity + 1usize
             }
         };
         let mut pool = Pool {
@@ -360,7 +360,7 @@ mod tests {
         assert_eq!(2, index.index());
         println!("pool: {:?}\n", pool);
         pool.remove_by_pos(0);
-        pool.remove_by_pos(16);
+        pool.remove_by_pos(17);
         // remove 42, gen=0 from 1
         pool.remove_by_pos(1);
         println!("pool: {:?}\n", pool);
@@ -406,24 +406,29 @@ mod tests {
     #[test]
     fn test_resize() {
         let mut pool = Pool::<i32>::new();
-        // add entries from 1 to 14, last slot remains empty
-        for i in 1..15 {
+        // add entries from 1 to 15, last slot remains empty
+        for i in 1..16 {
             pool.add(i);
         }
         println!("Pool after first insert round:\n {:?}\n", pool);
-        // use up the last slot (store 15 in index 15)
-        pool.add(15);
+        println!("pool size: {}\n", pool.size());
+        // use up the last slot (store 16 in index 16)
+        pool.add(16);
         println!("Pool after additional insert:\n {:?}\n", pool);
-        // add 8 more from 16 to 23
-        for i in 16..24 {
+        println!("pool size: {}\n", pool.size());
+        // add 8 more from 17 to 24
+        for i in 17..25 {
             pool.add(i);
         }
         println!("Pool after second insert round:\n {:?}\n", pool);
-        assert_eq!(36, pool.data.capacity());
-        assert_eq!(36, pool.data.len());
-        // add 24 to slot 24
-        pool.add(24);
+        println!("pool size: {}\n", pool.size());
+        assert_eq!(37, pool.data.capacity());
+        assert_eq!(37, pool.data.len());
+        assert_eq!(36, pool.size());
+        // add 25 to slot 25
+        pool.add(25);
         println!("Pool after additional insert:\n {:?}\n", pool);
+        println!("pool size: {}\n", pool.size());
     }
 
     #[test]
