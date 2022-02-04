@@ -238,6 +238,7 @@ impl<T> Pool<T> {
 }
 
 impl<T> Default for Pool<T> {
+    #[inline]
     fn default() -> Self {
         Pool::new()
     }
@@ -349,10 +350,7 @@ mod tests {
     fn print_sizes() {
         let size1 = size_of::<Slot<()>>();
         println!("size: {}", size1);
-        println!(
-            "ENTITY_INDEX_MASK: {}",
-            format!("{:#16x}", SLOT_INDEX_MASK)
-        );
+        println!("ENTITY_INDEX_MASK: {}", format!("{:#16x}", SLOT_INDEX_MASK));
         println!(
             "ENTITY_GENERATION_MASK: {}",
             format!("{:#8x}", SLOT_GENERATION_MASK)
