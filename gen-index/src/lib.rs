@@ -54,10 +54,7 @@ impl<T> Pool<T> {
                     let index = Index::new(*next_free_in_control as u64, next_gen);
                     // this may write usize::MAX into the control block
                     *next_free_in_control = new_next_empty;
-                    *slot = Slot::Taken {
-                        val: value,
-                        gen: next_gen,
-                    };
+                    *slot = Slot::new_taken(value, next_gen);
                     // check 'new_next_empty' that we haven't reached usize::MAX which is invalid
                     if new_next_empty == usize::MAX {
                         self.grow();
@@ -82,10 +79,7 @@ impl<T> Pool<T> {
                 let slot = &mut rest[occupied_slot_index_in_slice];
                 match slot {
                     Slot::Taken { gen, .. } => {
-                        *slot = Slot::Empty {
-                            an_empty: *next_free_in_control,
-                            gen: *gen + 1u32,
-                        };
+                        *slot = Slot::new_empty(*next_free_in_control, *gen + 1u32);
                         *next_free_in_control = pos;
                     }
                     Slot::Empty { .. } => {
@@ -112,10 +106,7 @@ impl<T> Pool<T> {
                         let next_gen = *gen + 1u32;
                         let old = std::mem::replace(
                             slot,
-                            Slot::Empty {
-                                an_empty: *next_free_in_control,
-                                gen: next_gen,
-                            },
+                            Slot::new_empty(*next_free_in_control, next_gen),
                         );
                         *next_free_in_control = pos;
                         if let Slot::Taken { val, .. } = old {
@@ -287,7 +278,7 @@ impl<T> Slot<T> {
     }
 
     #[inline]
-    pub(crate) fn new_occupied(val: T, gen: u32) -> Self {
+    pub(crate) fn new_taken(val: T, gen: u32) -> Self {
         Slot::Taken { val, gen }
     }
 
