@@ -167,9 +167,7 @@ impl<T> Pool<T> {
     pub fn clear(&mut self) {
         let length = self.data.len();
         // fix the control block
-        if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CTRL_BLOCK_IDX) {
-            *an_empty = 1usize;
-        }
+        self.fix_slot_pointer(CTRL_BLOCK_IDX, 1usize);
         // reset the slots
         for i in 1usize..length {
             let slot = &mut self.data[i];
@@ -214,17 +212,9 @@ impl<T> Pool<T> {
         let new_capacity = self.data.capacity();
         if new_capacity > old_capacity {
             // fix the control block if necessary
-            if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(CTRL_BLOCK_IDX) {
-                if *an_empty == usize::MAX {
-                    *an_empty = old_capacity;
-                }
-            }
+            self.fix_slot_pointer(CTRL_BLOCK_IDX, old_capacity);
             // fix the old 'an_empty' pointer if necessary
-            if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(old_capacity - 1usize) {
-                if *an_empty == usize::MAX {
-                    *an_empty = old_capacity;
-                }
-            }
+            self.fix_slot_pointer(old_capacity - 1usize, old_capacity);
             // initialize the additional slots
             for i in old_capacity..new_capacity {
                 self.data.push(Slot::initial_empty(i + 1usize));
@@ -232,6 +222,15 @@ impl<T> Pool<T> {
             // fix the 'an_empty' pointer in the last slot
             if let Slot::Empty { an_empty, .. } = &mut self.data[new_capacity - 1usize] {
                 *an_empty = usize::MAX;
+            }
+        }
+    }
+
+    #[inline]
+    fn fix_slot_pointer(&mut self, position: usize, new_empty: usize) {
+        if let Some(Slot::Empty { an_empty, .. }) = self.data.get_mut(position) {
+            if *an_empty == usize::MAX {
+                *an_empty = new_empty;
             }
         }
     }
