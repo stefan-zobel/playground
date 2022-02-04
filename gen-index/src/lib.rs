@@ -165,17 +165,12 @@ impl<T> Pool<T> {
                     *an_empty = i + 1usize;
                 }
                 Slot::Taken { gen, .. } => {
-                    *slot = Slot::Empty {
-                        an_empty: i + 1usize,
-                        gen: *gen + 1u32,
-                    };
+                    *slot = Slot::new_empty(i + 1usize, *gen + 1u32);
                 }
             }
         }
         // fix the 'an_empty' pointer in the last slot
-        if let Slot::Empty { an_empty, .. } = &mut self.data[length - 1usize] {
-            *an_empty = usize::MAX;
-        }
+        self.fix_slot_pointer(length - 1usize, usize::MAX, true);
     }
 
     #[inline]
