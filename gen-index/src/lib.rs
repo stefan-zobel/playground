@@ -54,7 +54,7 @@ impl<T> Pool<T> {
                     let index = Index::new(*next_free_in_control as u64, next_gen);
                     // this may write usize::MAX into the control block
                     *next_free_in_control = new_next_empty;
-                    *slot = Slot::Occupied {
+                    *slot = Slot::Taken {
                         val: value,
                         gen: next_gen,
                     };
@@ -64,7 +64,7 @@ impl<T> Pool<T> {
                     }
                     return index;
                 }
-                Slot::Occupied { .. } => {
+                Slot::Taken { .. } => {
                     panic!("index {} is already occupied!", *next_free_in_control);
                 }
             }
@@ -81,7 +81,7 @@ impl<T> Pool<T> {
                 let occupied_slot_index_in_slice = pos - 1usize;
                 let slot = &mut rest[occupied_slot_index_in_slice];
                 match slot {
-                    Slot::Occupied { gen, .. } => {
+                    Slot::Taken { gen, .. } => {
                         *slot = Slot::Empty {
                             an_empty: *next_free_in_control,
                             gen: *gen + 1u32,
@@ -107,7 +107,7 @@ impl<T> Pool<T> {
                 let next_free_in_control = an_empty;
                 let occupied_slot_index_in_slice = pos - 1usize;
                 let slot = &mut rest[occupied_slot_index_in_slice];
-                if let Slot::Occupied { gen, .. } = slot {
+                if let Slot::Taken { gen, .. } = slot {
                     if *gen == index.generation() {
                         let next_gen = *gen + 1u32;
                         let old = std::mem::replace(
@@ -118,7 +118,7 @@ impl<T> Pool<T> {
                             },
                         );
                         *next_free_in_control = pos;
-                        if let Slot::Occupied { val, .. } = old {
+                        if let Slot::Taken { val, .. } = old {
                             return Some(val);
                         }
                     }
@@ -135,7 +135,7 @@ impl<T> Pool<T> {
         let pos = index.index() as usize;
         let version = index.generation();
         if pos > 0 && pos < self.data.len() {
-            if let Slot::Occupied { val, gen } = &self.data[pos] {
+            if let Slot::Taken { val, gen } = &self.data[pos] {
                 if *gen == version {
                     return Some(val);
                 }
@@ -149,7 +149,7 @@ impl<T> Pool<T> {
         let pos = index.index() as usize;
         let version = index.generation();
         if pos > 0 && pos < self.data.len() {
-            if let Slot::Occupied { val, gen } = self.data.get_mut(pos)? {
+            if let Slot::Taken { val, gen } = self.data.get_mut(pos)? {
                 if *gen == version {
                     return Some(val);
                 }
@@ -177,7 +177,7 @@ impl<T> Pool<T> {
                 Slot::Empty { an_empty, .. } => {
                     *an_empty = i + 1usize;
                 }
-                Slot::Occupied { gen, .. } => {
+                Slot::Taken { gen, .. } => {
                     *slot = Slot::Empty {
                         an_empty: i + 1usize,
                         gen: *gen + 1u32,
@@ -246,7 +246,7 @@ impl<T> Default for Pool<T> {
 #[derive(Clone, Debug)]
 pub(crate) enum Slot<T> {
     Empty { an_empty: usize, gen: u32 },
-    Occupied { val: T, gen: u32 },
+    Taken { val: T, gen: u32 },
 }
 
 impl<T> Slot<T> {
@@ -257,14 +257,14 @@ impl<T> Slot<T> {
 
     #[inline]
     pub(crate) fn is_occupied(&self) -> bool {
-        matches!(self, Slot::Occupied { .. })
+        matches!(self, Slot::Taken { .. })
     }
 
     #[inline]
     pub(crate) fn generation(&self) -> u32 {
         match self {
             Slot::Empty { gen, .. } => *gen,
-            Slot::Occupied { gen, .. } => *gen,
+            Slot::Taken { gen, .. } => *gen,
         }
     }
 
@@ -272,7 +272,7 @@ impl<T> Slot<T> {
     pub(crate) fn get(&self) -> Option<&T> {
         match self {
             Slot::Empty { .. } => None,
-            Slot::Occupied { val, .. } => Some(val),
+            Slot::Taken { val, .. } => Some(val),
         }
     }
 
@@ -280,13 +280,13 @@ impl<T> Slot<T> {
     pub(crate) fn get_mut(&mut self) -> Option<&mut T> {
         match self {
             Slot::Empty { .. } => None,
-            Slot::Occupied { val, .. } => Some(val),
+            Slot::Taken { val, .. } => Some(val),
         }
     }
 
     #[inline]
     pub(crate) fn new_occupied(val: T, gen: u32) -> Self {
-        Slot::Occupied { val, gen }
+        Slot::Taken { val, gen }
     }
 
     #[inline]
