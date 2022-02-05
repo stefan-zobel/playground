@@ -12,6 +12,9 @@ const CTRL_BLOCK_IDX: usize = 0usize;
 const ONE: usize = 1usize;
 const DEFAULT_CAPACITY: usize = 16usize;
 
+const ERR_CAP_MSG: &str = "capacity overflow: {}";
+const ERR_CTRL_MSG: &str = "control block is not empty!";
+
 #[derive(Debug)]
 pub struct Pool<T> {
     data: Vec<Slot<T>>,
@@ -30,7 +33,7 @@ impl<T> Pool<T> {
             if capacity <= DEFAULT_CAPACITY {
                 DEFAULT_CAPACITY + ONE
             } else if capacity > SLOT_INDEX_BITS as usize + ONE {
-                panic!("capacity overflow: {}", capacity)
+                panic!(ERR_CAP_MSG, capacity)
             } else {
                 capacity + ONE
             }
@@ -66,11 +69,11 @@ impl<T> Pool<T> {
                     return index;
                 }
                 Slot::Taken { .. } => {
-                    panic!("index {} is already occupied!", *next_free_in_control);
+                    panic!("index {} is already taken!", *next_free_in_control);
                 }
             }
         }
-        panic!("control block is not empty!");
+        panic!(ERR_CTRL_MSG);
     }
 
     #[inline]
@@ -92,7 +95,7 @@ impl<T> Pool<T> {
                     }
                 }
             } else {
-                panic!("control block is not empty!");
+                panic!(ERR_CTRL_MSG);
             }
         }
     }
@@ -121,7 +124,7 @@ impl<T> Pool<T> {
                     }
                 }
             } else {
-                panic!("control block is not empty!");
+                panic!(ERR_CTRL_MSG);
             }
         }
         None
@@ -200,7 +203,7 @@ impl<T> Pool<T> {
         let old_capacity = self.data.capacity();
         let new_capacity = old_capacity + (old_capacity >> 1);
         if new_capacity > SLOT_INDEX_BITS as usize + ONE {
-            panic!("capacity overflow: {}", new_capacity);
+            panic!(ERR_CAP_MSG, new_capacity);
         }
         self.data.reserve_exact(new_capacity - old_capacity);
         let new_capacity = self.data.capacity();
