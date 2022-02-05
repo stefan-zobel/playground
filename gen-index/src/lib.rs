@@ -9,6 +9,7 @@ const SLOT_GENERATION_BITS: u32 = 28;
 const SLOT_GENERATION_MASK: u32 = (1 << SLOT_GENERATION_BITS) - 1;
 
 const CTRL_BLOCK_IDX: usize = 0usize;
+const ONE: usize = 1usize;
 const DEFAULT_CAPACITY: usize = 16usize;
 
 #[derive(Debug)]
@@ -26,11 +27,11 @@ impl<T> Pool<T> {
     pub fn with_capacity(capacity: usize) -> Self {
         let capacity = {
             if capacity <= DEFAULT_CAPACITY {
-                DEFAULT_CAPACITY + 1usize
-            } else if capacity > SLOT_INDEX_BITS as usize + 1usize {
+                DEFAULT_CAPACITY + ONE
+            } else if capacity > SLOT_INDEX_BITS as usize + ONE {
                 panic!("capacity overflow: {}", capacity)
             } else {
-                capacity + 1usize
+                capacity + ONE
             }
         };
         let mut pool = Pool {
@@ -42,10 +43,10 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn add(&mut self, value: T) -> Index {
-        let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + 1usize);
+        let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
         if let [Slot::Empty { an_empty, .. }] = control {
             let next_free_in_control = an_empty;
-            let free_slot_index_in_slice = *next_free_in_control - 1usize;
+            let free_slot_index_in_slice = *next_free_in_control - ONE;
             let slot = &mut rest[free_slot_index_in_slice];
             match slot {
                 Slot::Empty { an_empty, gen } => {
@@ -72,10 +73,10 @@ impl<T> Pool<T> {
     #[inline]
     pub(crate) fn remove_by_pos(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
-            let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + 1usize);
+            let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
-                let occupied_slot_index_in_slice = pos - 1usize;
+                let occupied_slot_index_in_slice = pos - ONE;
                 let slot = &mut rest[occupied_slot_index_in_slice];
                 match slot {
                     Slot::Taken { gen, .. } => {
@@ -96,10 +97,10 @@ impl<T> Pool<T> {
     pub fn remove(&mut self, index: Index) -> Option<T> {
         let pos = index.index() as usize;
         if pos > 0 && pos < self.data.len() {
-            let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + 1usize);
+            let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
-                let occupied_slot_index_in_slice = pos - 1usize;
+                let occupied_slot_index_in_slice = pos - ONE;
                 let slot = &mut rest[occupied_slot_index_in_slice];
                 if let Slot::Taken { gen, .. } = slot {
                     if *gen == index.generation() {
@@ -149,45 +150,45 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn size(&self) -> u64 {
-        (self.data.len() - 1usize) as u64
+        (self.data.len() - ONE) as u64
     }
 
     #[inline]
     pub fn clear(&mut self) {
         let length = self.data.len();
         // fix the control block
-        self.fix_slot_pointer(CTRL_BLOCK_IDX, 1usize, true);
+        self.fix_slot_pointer(CTRL_BLOCK_IDX, ONE, true);
         // reset the slots
-        for i in 1usize..length {
+        for i in ONE..length {
             let slot = &mut self.data[i];
             match slot {
                 Slot::Empty { an_empty, .. } => {
-                    *an_empty = i + 1usize;
+                    *an_empty = i + ONE;
                 }
                 Slot::Taken { gen, .. } => {
-                    *slot = Slot::new_empty(i + 1usize, *gen + 1u32);
+                    *slot = Slot::new_empty(i + ONE, *gen + 1u32);
                 }
             }
         }
         // fix the 'an_empty' pointer in the last slot
-        self.fix_slot_pointer(length - 1usize, usize::MAX, true);
+        self.fix_slot_pointer(length - ONE, usize::MAX, true);
     }
 
     #[inline]
     fn init_pool(pool: &mut Pool<T>) {
         let capacity = pool.data.capacity();
         for i in 0..capacity {
-            pool.data.push(Slot::initial_empty(i + 1usize));
+            pool.data.push(Slot::initial_empty(i + ONE));
         }
         // fix the 'an_empty' pointer in the last slot
-        pool.fix_slot_pointer(capacity - 1usize, usize::MAX, true);
+        pool.fix_slot_pointer(capacity - ONE, usize::MAX, true);
     }
 
     #[inline]
     fn grow(&mut self) {
         let old_capacity = self.data.capacity();
         let new_capacity = old_capacity + (old_capacity >> 1);
-        if new_capacity > SLOT_INDEX_BITS as usize + 1usize {
+        if new_capacity > SLOT_INDEX_BITS as usize + ONE {
             panic!("capacity overflow: {}", new_capacity);
         }
         self.data.reserve_exact(new_capacity - old_capacity);
@@ -196,13 +197,13 @@ impl<T> Pool<T> {
             // fix the control block if necessary
             self.fix_slot_pointer(CTRL_BLOCK_IDX, old_capacity, false);
             // fix the old 'an_empty' pointer if necessary
-            self.fix_slot_pointer(old_capacity - 1usize, old_capacity, false);
+            self.fix_slot_pointer(old_capacity - ONE, old_capacity, false);
             // initialize the additional slots
             for i in old_capacity..new_capacity {
-                self.data.push(Slot::initial_empty(i + 1usize));
+                self.data.push(Slot::initial_empty(i + ONE));
             }
             // fix the 'an_empty' pointer in the last slot
-            self.fix_slot_pointer(new_capacity - 1usize, usize::MAX, true);
+            self.fix_slot_pointer(new_capacity - ONE, usize::MAX, true);
         }
     }
 
