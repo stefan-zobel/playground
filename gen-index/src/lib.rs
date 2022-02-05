@@ -15,6 +15,7 @@ const DEFAULT_CAPACITY: usize = 16usize;
 #[derive(Debug)]
 pub struct Pool<T> {
     data: Vec<Slot<T>>,
+    num_taken: usize,
 }
 
 impl<T> Pool<T> {
@@ -36,6 +37,7 @@ impl<T> Pool<T> {
         };
         let mut pool = Pool {
             data: Vec::<Slot<T>>::with_capacity(capacity),
+            num_taken: 0usize,
         };
         Pool::init_pool(&mut pool);
         pool
@@ -43,6 +45,7 @@ impl<T> Pool<T> {
 
     #[inline]
     pub fn add(&mut self, value: T) -> Index {
+        self.num_taken += ONE;
         let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
         if let [Slot::Empty { an_empty, .. }] = control {
             let next_free_in_control = an_empty;
@@ -73,6 +76,7 @@ impl<T> Pool<T> {
     #[inline]
     pub(crate) fn remove_by_pos(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
+            self.num_taken -= ONE;
             let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
@@ -110,6 +114,7 @@ impl<T> Pool<T> {
                             Slot::new_empty(*next_free_in_control, next_gen),
                         );
                         *next_free_in_control = pos;
+                        self.num_taken -= ONE;
                         if let Slot::Taken { val, .. } = old {
                             return Some(val);
                         }
@@ -154,10 +159,16 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub fn taken(&self) -> u64 {
+        self.num_taken as u64
+    }
+
+    #[inline]
     pub fn clear(&mut self) {
         let length = self.data.len();
         // fix the control block
         self.fix_slot_pointer(CTRL_BLOCK_IDX, ONE, true);
+        self.num_taken = 0usize;
         // reset the slots
         for i in ONE..length {
             let slot = &mut self.data[i];
