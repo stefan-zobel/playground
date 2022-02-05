@@ -12,13 +12,14 @@ const CTRL_BLOCK_IDX: usize = 0usize;
 const ONE: usize = 1usize;
 const DEFAULT_CAPACITY: usize = 16usize;
 
-const ERR_CAP_MSG: &str = "capacity overflow: {}";
+const ERR_CAP_MSG: &str = "capacity overflow:";
 const ERR_CTRL_MSG: &str = "control block is not empty!";
 
 #[derive(Debug)]
 pub struct Pool<T> {
     data: Vec<Slot<T>>,
     num_taken: usize,
+    max_taken_pos: usize,
 }
 
 impl<T> Pool<T> {
@@ -33,7 +34,7 @@ impl<T> Pool<T> {
             if capacity <= DEFAULT_CAPACITY {
                 DEFAULT_CAPACITY + ONE
             } else if capacity > SLOT_INDEX_BITS as usize + ONE {
-                panic!(ERR_CAP_MSG, capacity)
+                panic!("{} {}", ERR_CAP_MSG, capacity)
             } else {
                 capacity + ONE
             }
@@ -41,6 +42,7 @@ impl<T> Pool<T> {
         let mut pool = Pool {
             data: Vec::<Slot<T>>::with_capacity(capacity),
             num_taken: 0usize,
+            max_taken_pos: 0usize,
         };
         Pool::init_pool(&mut pool);
         pool
@@ -73,7 +75,7 @@ impl<T> Pool<T> {
                 }
             }
         }
-        panic!(ERR_CTRL_MSG);
+        panic!("{}", ERR_CTRL_MSG);
     }
 
     #[inline]
@@ -95,7 +97,7 @@ impl<T> Pool<T> {
                     }
                 }
             } else {
-                panic!(ERR_CTRL_MSG);
+                panic!("{}", ERR_CTRL_MSG);
             }
         }
     }
@@ -124,7 +126,7 @@ impl<T> Pool<T> {
                     }
                 }
             } else {
-                panic!(ERR_CTRL_MSG);
+                panic!("{}", ERR_CTRL_MSG);
             }
         }
         None
@@ -203,7 +205,7 @@ impl<T> Pool<T> {
         let old_capacity = self.data.capacity();
         let new_capacity = old_capacity + (old_capacity >> 1);
         if new_capacity > SLOT_INDEX_BITS as usize + ONE {
-            panic!(ERR_CAP_MSG, new_capacity);
+            panic!("{} {}", ERR_CAP_MSG, new_capacity);
         }
         self.data.reserve_exact(new_capacity - old_capacity);
         let new_capacity = self.data.capacity();
@@ -344,9 +346,9 @@ mod tests {
     fn print_sizes() {
         let size1 = size_of::<Slot<()>>();
         println!("size: {}", size1);
-        println!("ENTITY_INDEX_MASK: {}", format!("{:#16x}", SLOT_INDEX_MASK));
+        println!("SLOT_INDEX_MASK: {}", format!("{:#16x}", SLOT_INDEX_MASK));
         println!(
-            "ENTITY_GENERATION_MASK: {}",
+            "SLOT_GENERATION_MASK: {}",
             format!("{:#8x}", SLOT_GENERATION_MASK)
         );
     }
