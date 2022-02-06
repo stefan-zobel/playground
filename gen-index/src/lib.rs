@@ -296,7 +296,6 @@ impl<'a, T> Iterator for Iter<'a, T> {
                     return Some(val);
                 }
                 Some((pos, &Slot::Empty { .. })) => {
-                    println!("position: {}", pos);
                     if pos > self.upper_bound {
                         assert_eq!(self.remaining, 0usize);
                         break None;
@@ -624,14 +623,24 @@ mod tests {
     fn test_iter() {
         println!("test_iter()");
         let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
         for i in 1..17 {
             pool.add(i);
         }
+        // remove the first 14 items
         for i in 1..15 {
             pool.remove_by_pos(i);
         }
+        // iterate the remaining 2 items
+        let mut i: u32 = 0;
         for elem in pool.iter() {
-            println!("iter element: {}", elem);
+            if i == 0 {
+                assert_eq!(15, *elem);
+            } else {
+                assert_eq!(16, *elem);
+            }
+            println!("iter element: {}", *elem);
+            i += 1;
         }
     }
 }
