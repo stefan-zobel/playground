@@ -847,4 +847,16 @@ mod tests {
         assert_eq!(16, pool.max_taken_pos);
         assert_eq!(17, pool.get_control_block_empty_pointer());
     }
+
+    #[test]
+    fn test_shrink_to_fit_when_empty() {
+        println!("test_shrink_to_fit_when_empty:");
+        let mut pool = Pool::<i32>::with_capacity(10);
+        println!("Pool before shrinking:\n {:?}\n", pool);
+        pool.shrink_to_fit();
+        println!("Pool after shrinking:\n {:?}\n", pool);
+        assert_eq!(0, pool.taken());
+        assert_eq!(0, pool.max_taken_pos);
+        assert_eq!(1, pool.get_control_block_empty_pointer());
+    }
 }
