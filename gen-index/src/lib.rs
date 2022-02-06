@@ -207,6 +207,7 @@ impl<T> Pool<T> {
         // fix the control block
         self.fix_slot_pointer(CTRL_BLOCK_IDX, ONE, true);
         self.num_taken = 0usize;
+        self.max_taken_pos = CTRL_BLOCK_IDX;
         // reset the slots
         for i in ONE..length {
             let slot = &mut self.data[i];
