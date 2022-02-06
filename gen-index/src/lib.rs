@@ -33,7 +33,7 @@ impl<T> Pool<T> {
         let capacity = {
             if capacity <= DEFAULT_CAPACITY {
                 DEFAULT_CAPACITY + ONE
-            } else if capacity > SLOT_INDEX_BITS as usize + ONE {
+            } else if capacity > SLOT_INDEX_MASK as usize + ONE {
                 panic!("{} {}", ERR_CAP_MSG, capacity)
             } else {
                 capacity + ONE
@@ -265,7 +265,86 @@ impl<T> Pool<T> {
             }
         }
     }
+
+    #[inline]
+    pub fn iter(&self) -> Iter<T> {
+        let mut enumerator = self.data.iter().enumerate();
+        // skip control block
+        enumerator.next();
+        Iter {
+            inner: enumerator,
+            remaining: self.num_taken,
+            upper_bound: self.max_taken_pos,
+        }
+    }
 }
+
+pub struct Iter<'a, T: 'a> {
+    inner: std::iter::Enumerate<std::slice::Iter<'a, Slot<T>>>,
+    remaining: usize,
+    upper_bound: usize,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.inner.next() {
+                Some((_, &Slot::Taken { ref val, .. })) => {
+                    self.remaining -= 1usize;
+                    return Some(val);
+                }
+                Some((pos, &Slot::Empty { .. })) => {
+                    println!("position: {}", pos);
+                    if pos > self.upper_bound {
+                        assert_eq!(self.remaining, 0usize);
+                        break None;
+                    } else {
+                        continue;
+                    }
+                }
+                None => {
+                    assert_eq!(self.remaining, 0usize);
+                    return None;
+                }
+            }
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+// struct IntoIter<T> {
+//     inner: std::vec::IntoIter<Slot<T>>,
+// //    inner: std::iter::Enumerate<std::slice::Iter<'a, Slot<T>>>,
+//     remaining: usize,
+//     upper_bound: usize,
+// }
+//
+// impl<'a, T> Iterator for IntoIter<T> {
+//     type Item = &'a T;
+//
+//     fn next(&mut self) -> Option<Self::Item> {
+//         to do()
+//     }
+//
+//     fn size_hint(&self) -> (usize, Option<usize>) {
+//         to do()
+//     }
+// }
+//
+// impl<'a, T> IntoIterator for &'a Pool<T> {
+//     type Item = &'a T;
+//     type IntoIter = ();
+//
+//     fn into_iter(self) -> Self::IntoIter {
+//         //std::vec::IntoIter;
+//         to do()
+//     }
+// }
 
 impl<T> Default for Pool<T> {
     #[inline]
@@ -539,5 +618,20 @@ mod tests {
         pool.remove_by_pos(1);
         assert_eq!(0, pool.max_taken_pos);
         println!("Pool:\n {:?}\n", pool);
+    }
+
+    #[test]
+    fn test_iter() {
+        println!("test_iter()");
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        for i in 1..17 {
+            pool.add(i);
+        }
+        for i in 1..15 {
+            pool.remove_by_pos(i);
+        }
+        for elem in pool.iter() {
+            println!("iter element: {}", elem);
+        }
     }
 }
