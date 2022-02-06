@@ -244,11 +244,8 @@ impl<T> Pool<T> {
         self.data.truncate(self.max_taken_pos + (ONE + ONE));
         self.data.shrink_to(self.max_taken_pos + (ONE + ONE));
         let length = self.data.len();
-        let (control, _) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
-        if let [Slot::Empty { an_empty, .. }] = control {
-            if *an_empty > length - ONE {
-                self.fix_slot_pointer(CTRL_BLOCK_IDX, length - ONE, true);
-            }
+        if self.get_control_block_empty_pointer() > length - ONE {
+            self.fix_slot_pointer(CTRL_BLOCK_IDX, length - ONE, true);
         }
         // fix the 'an_empty' pointer in the last slot
         self.fix_slot_pointer(length - ONE, usize::MAX, true);
