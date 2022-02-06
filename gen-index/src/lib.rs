@@ -202,6 +202,11 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.num_taken == 0usize
+    }
+
+    #[inline]
     pub fn clear(&mut self) {
         let length = self.data.len();
         // fix the control block
@@ -371,34 +376,23 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     }
 }
 
-// struct IntoIter<T> {
-//     inner: std::vec::IntoIter<Slot<T>>,
-// //    inner: std::iter::Enumerate<std::slice::Iter<'a, Slot<T>>>,
-//     remaining: usize,
-//     upper_bound: usize,
-// }
-//
-// impl<'a, T> Iterator for IntoIter<T> {
-//     type Item = &'a T;
-//
-//     fn next(&mut self) -> Option<Self::Item> {
-//         to do()
-//     }
-//
-//     fn size_hint(&self) -> (usize, Option<usize>) {
-//         to do()
-//     }
-// }
-//
-// impl<'a, T> IntoIterator for &'a Pool<T> {
-//     type Item = &'a T;
-//     type IntoIter = ();
-//
-//     fn into_iter(self) -> Self::IntoIter {
-//         //std::vec::IntoIter;
-//         to do()
-//     }
-// }
+impl<'a, T> IntoIterator for &'a Pool<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a mut Pool<T> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
+}
 
 impl<T> Default for Pool<T> {
     #[inline]
@@ -701,7 +695,7 @@ mod tests {
 
     #[test]
     fn test_iter_mut() {
-        println!("test_iter()");
+        println!("test_iter_mut()");
         let mut pool = Pool::<i32>::with_capacity(1024);
         // add 16 items in order
         for i in 1..17 {
@@ -726,6 +720,68 @@ mod tests {
         }
         i = 0;
         for changed in pool.iter() {
+            if i == 0 {
+                assert_eq!(30, *changed);
+            } else {
+                assert_eq!(32, *changed);
+            }
+            println!("iter element: {}", *changed);
+            i += 1;
+        }
+    }
+
+    #[test]
+    fn test_into_iter() {
+        println!("test_into_iter()");
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
+        for i in 1..17 {
+            pool.add(i);
+        }
+        // remove the first 14 items
+        for i in 1..15 {
+            pool.remove_by_pos(i);
+        }
+        // iterate over the remaining 2 items
+        let mut i: u32 = 0;
+        for elem in &pool {
+            if i == 0 {
+                assert_eq!(15, *elem);
+            } else {
+                assert_eq!(16, *elem);
+            }
+            println!("iter element: {}", *elem);
+            i += 1;
+        }
+    }
+
+    #[test]
+    fn test_into_iter_mut() {
+        println!("test_into_iter_mut()");
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
+        for i in 1..17 {
+            pool.add(i);
+        }
+        // remove the first 14 items
+        for i in 1..15 {
+            pool.remove_by_pos(i);
+        }
+        // iterate over the remaining 2 items
+        let mut i: u32 = 0;
+        for elem in &mut pool {
+            if i == 0 {
+                assert_eq!(15, *elem);
+            } else {
+                assert_eq!(16, *elem);
+            }
+            println!("iter element: {}", *elem);
+            // multiply by 2
+            *elem = 2 * *elem;
+            i += 1;
+        }
+        i = 0;
+        for changed in &pool {
             if i == 0 {
                 assert_eq!(30, *changed);
             } else {
