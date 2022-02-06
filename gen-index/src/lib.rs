@@ -120,6 +120,7 @@ impl<T> Pool<T> {
         }
     }
 
+    //noinspection ALL
     #[inline]
     pub fn remove(&mut self, index: Index) -> Option<T> {
         let pos = index.index() as usize;
@@ -139,6 +140,19 @@ impl<T> Pool<T> {
                         *next_free_in_control = pos;
                         self.num_taken -= ONE;
                         let max_taken = self.max_taken_pos;
+                        if pos == max_taken {
+                            for i in (CTRL_BLOCK_IDX..taken_slot_index_in_slice).rev() {
+                                if rest[i].is_taken() {
+                                    self.max_taken_pos = i + ONE;
+                                    break;
+                                }
+                            }
+                            // if all slots to the left were empty
+                            // or 'taken_slot_index_in_slice' was 0
+                            if self.max_taken_pos == max_taken {
+                                self.max_taken_pos = CTRL_BLOCK_IDX;
+                            }
+                        }
                         if let Slot::Taken { val, .. } = old {
                             return Some(val);
                         }
