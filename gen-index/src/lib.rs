@@ -277,10 +277,30 @@ impl<T> Pool<T> {
             upper_bound: self.max_taken_pos,
         }
     }
+
+    #[inline]
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        let mut enumerator = self.data.iter_mut().enumerate();
+        // skip control block
+        enumerator.next();
+        IterMut {
+            inner: enumerator,
+            remaining: self.num_taken,
+            upper_bound: self.max_taken_pos,
+        }
+    }
 }
 
+#[derive(Clone, Debug)]
 pub struct Iter<'a, T: 'a> {
     inner: std::iter::Enumerate<std::slice::Iter<'a, Slot<T>>>,
+    remaining: usize,
+    upper_bound: usize,
+}
+
+#[derive(Debug)]
+pub struct IterMut<'a, T: 'a> {
+    inner: std::iter::Enumerate<std::slice::IterMut<'a, Slot<T>>>,
     remaining: usize,
     upper_bound: usize,
 }
@@ -288,11 +308,12 @@ pub struct Iter<'a, T: 'a> {
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.inner.next() {
                 Some((_, &Slot::Taken { ref val, .. })) => {
-                    self.remaining -= 1usize;
+                    self.remaining -= ONE;
                     return Some(val);
                 }
                 Some((pos, &Slot::Empty { .. })) => {
@@ -311,6 +332,40 @@ impl<'a, T> Iterator for Iter<'a, T> {
         }
     }
 
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.inner.next() {
+                Some((_, &mut Slot::Taken { ref mut val, .. })) => {
+                    self.remaining -= ONE;
+                    return Some(val);
+                }
+                Some((pos, &mut Slot::Empty { .. })) => {
+                    if pos > self.upper_bound {
+                        assert_eq!(self.remaining, 0usize);
+                        break None;
+                    } else {
+                        continue;
+                    }
+                }
+                None => {
+                    assert_eq!(self.remaining, 0usize);
+                    return None;
+                }
+            }
+        }
+    }
+
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.remaining, Some(self.remaining))
     }
@@ -631,7 +686,7 @@ mod tests {
         for i in 1..15 {
             pool.remove_by_pos(i);
         }
-        // iterate the remaining 2 items
+        // iterate over the remaining 2 items
         let mut i: u32 = 0;
         for elem in pool.iter() {
             if i == 0 {
@@ -640,6 +695,43 @@ mod tests {
                 assert_eq!(16, *elem);
             }
             println!("iter element: {}", *elem);
+            i += 1;
+        }
+    }
+
+    #[test]
+    fn test_iter_mut() {
+        println!("test_iter()");
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
+        for i in 1..17 {
+            pool.add(i);
+        }
+        // remove the first 14 items
+        for i in 1..15 {
+            pool.remove_by_pos(i);
+        }
+        // iterate over the remaining 2 items
+        let mut i: u32 = 0;
+        for elem in pool.iter_mut() {
+            if i == 0 {
+                assert_eq!(15, *elem);
+            } else {
+                assert_eq!(16, *elem);
+            }
+            println!("iter element: {}", *elem);
+            // multiply by 2
+            *elem = 2 * *elem;
+            i += 1;
+        }
+        i = 0;
+        for changed in pool.iter() {
+            if i == 0 {
+                assert_eq!(30, *changed);
+            } else {
+                assert_eq!(32, *changed);
+            }
+            println!("iter element: {}", *changed);
             i += 1;
         }
     }
