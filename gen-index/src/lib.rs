@@ -82,6 +82,7 @@ impl<T> Pool<T> {
         panic!("{}", ERR_CTRL_MSG);
     }
 
+    //noinspection ALL
     #[inline]
     pub(crate) fn remove_by_pos(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
@@ -380,6 +381,7 @@ impl<'a, T> IntoIterator for &'a Pool<T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -389,6 +391,7 @@ impl<'a, T> IntoIterator for &'a mut Pool<T> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()
     }
