@@ -51,9 +51,13 @@ impl<T> Pool<T> {
     #[inline]
     pub fn add(&mut self, value: T) -> Index {
         self.num_taken += ONE;
+        let max_taken = self.max_taken_pos;
         let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
         if let [Slot::Empty { an_empty, .. }] = control {
             let next_free_in_control = an_empty;
+            if *next_free_in_control > max_taken {
+                self.max_taken_pos = *next_free_in_control;
+            }
             let free_slot_index_in_slice = *next_free_in_control - ONE;
             let slot = &mut rest[free_slot_index_in_slice];
             match slot {
@@ -82,15 +86,29 @@ impl<T> Pool<T> {
     pub(crate) fn remove_by_pos(&mut self, pos: usize) {
         if pos > 0 && pos < self.data.len() {
             self.num_taken -= ONE;
+            let max_taken = self.max_taken_pos;
             let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
-                let occupied_slot_index_in_slice = pos - ONE;
-                let slot = &mut rest[occupied_slot_index_in_slice];
+                let taken_slot_index_in_slice = pos - ONE;
+                let slot = &mut rest[taken_slot_index_in_slice];
                 match slot {
                     Slot::Taken { gen, .. } => {
                         *slot = Slot::new_empty(*next_free_in_control, *gen + 1u32);
                         *next_free_in_control = pos;
+                        if pos == max_taken {
+                            for i in (CTRL_BLOCK_IDX..taken_slot_index_in_slice).rev() {
+                                if rest[i].is_taken() {
+                                    self.max_taken_pos = i + ONE;
+                                    break;
+                                }
+                            }
+                            // if all slots to the left were empty
+                            // or 'taken_slot_index_in_slice' was 0
+                            if self.max_taken_pos == max_taken {
+                                self.max_taken_pos = CTRL_BLOCK_IDX;
+                            }
+                        }
                     }
                     Slot::Empty { .. } => {
                         panic!("index {} is already empty!", pos);
@@ -109,8 +127,8 @@ impl<T> Pool<T> {
             let (control, rest) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
             if let [Slot::Empty { an_empty, .. }] = control {
                 let next_free_in_control = an_empty;
-                let occupied_slot_index_in_slice = pos - ONE;
-                let slot = &mut rest[occupied_slot_index_in_slice];
+                let taken_slot_index_in_slice = pos - ONE;
+                let slot = &mut rest[taken_slot_index_in_slice];
                 if let Slot::Taken { gen, .. } = slot {
                     if *gen == index.generation() {
                         let next_gen = *gen + 1u32;
@@ -120,6 +138,7 @@ impl<T> Pool<T> {
                         );
                         *next_free_in_control = pos;
                         self.num_taken -= ONE;
+                        let max_taken = self.max_taken_pos;
                         if let Slot::Taken { val, .. } = old {
                             return Some(val);
                         }
@@ -455,5 +474,55 @@ mod tests {
         let val = pool.remove(idx);
         println!("got back : {:?}", val);
         println!("Pool after removal:\n {:?}\n", pool);
+    }
+
+    #[test]
+    fn test_max_taken_remove_by_pos() {
+        println!("MAX_TAKEN_REMOVE_TEST");
+        let mut pool = Pool::<i32>::new();
+        println!("max_taken_pos after init: {}", pool.max_taken_pos);
+        assert_eq!(0, pool.max_taken_pos);
+        let _idx = pool.add(1);
+        println!("max_taken_pos: {}", pool.max_taken_pos);
+        assert_eq!(1, pool.max_taken_pos);
+        pool.remove_by_pos(1);
+        println!("max_taken_pos after remove: {}", pool.max_taken_pos);
+        assert_eq!(0, pool.max_taken_pos);
+        let _idx = pool.add(1);
+        assert_eq!(1, pool.max_taken_pos);
+        let _idx = pool.add(2);
+        assert_eq!(2, pool.max_taken_pos);
+        let _idx = pool.add(3);
+        assert_eq!(3, pool.max_taken_pos);
+        pool.remove_by_pos(2);
+        assert_eq!(3, pool.max_taken_pos);
+        pool.remove_by_pos(3);
+        assert_eq!(1, pool.max_taken_pos);
+        pool.remove_by_pos(1);
+        assert_eq!(0, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
+        let _idx = pool.add(1);
+        assert_eq!(1, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
+        let _idx = pool.add(2);
+        assert_eq!(3, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
+        let _idx = pool.add(3);
+        assert_eq!(3, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
+        let _idx = pool.add(4);
+        assert_eq!(4, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
+        pool.remove_by_pos(4);
+        println!("Pool:\n {:?}\n", pool);
+        assert_eq!(3, pool.max_taken_pos);
+        pool.remove_by_pos(3);
+        assert_eq!(2, pool.max_taken_pos);
+        pool.remove_by_pos(2);
+        assert_eq!(1, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
+        pool.remove_by_pos(1);
+        assert_eq!(0, pool.max_taken_pos);
+        println!("Pool:\n {:?}\n", pool);
     }
 }
