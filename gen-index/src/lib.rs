@@ -167,6 +167,14 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub(crate) fn get_control_block_empty_pointer(&self) -> usize {
+        if let Slot::Empty { an_empty, .. } = &self.data[CTRL_BLOCK_IDX] {
+            return *an_empty;
+        }
+        panic!("{}", ERR_CTRL_MSG);
+    }
+
+    #[inline]
     pub fn get(&self, index: Index) -> Option<&T> {
         let (pos, version) = index.parts();
         if pos > 0 && pos < self.data.len() {
@@ -224,6 +232,22 @@ impl<T> Pool<T> {
                 Slot::Taken { gen, .. } => {
                     *slot = Slot::new_empty(i + ONE, *gen + 1u32);
                 }
+            }
+        }
+        // fix the 'an_empty' pointer in the last slot
+        self.fix_slot_pointer(length - ONE, usize::MAX, true);
+    }
+
+    #[inline]
+    pub fn shrink_to_fit(&mut self) {
+        // always keep one extra free Slot
+        self.data.truncate(self.max_taken_pos + (ONE + ONE));
+        self.data.shrink_to(self.max_taken_pos + (ONE + ONE));
+        let length = self.data.len();
+        let (control, _) = self.data.split_at_mut(CTRL_BLOCK_IDX + ONE);
+        if let [Slot::Empty { an_empty, .. }] = control {
+            if *an_empty > length - ONE {
+                self.fix_slot_pointer(CTRL_BLOCK_IDX, length - ONE, true);
             }
         }
         // fix the 'an_empty' pointer in the last slot
@@ -793,5 +817,34 @@ mod tests {
             println!("iter element: {}", *changed);
             i += 1;
         }
+    }
+
+    #[test]
+    fn test_shrink_to_fit1() {
+        println!("test_shrink_to_fit1:");
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
+        for i in 1..17 {
+            pool.add(i);
+        }
+        // remove the first 14 items
+        for i in 1..15 {
+            pool.remove_by_pos(i);
+        }
+        pool.shrink_to_fit();
+        println!("A) Pool after shrinking:\n {:?}\n", pool);
+        assert_eq!(2, pool.taken());
+        assert_eq!(16, pool.max_taken_pos);
+        assert_eq!(14, pool.get_control_block_empty_pointer());
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
+        for i in 1..17 {
+            pool.add(i);
+        }
+        pool.shrink_to_fit();
+        println!("B) Pool after shrinking:\n {:?}\n", pool);
+        assert_eq!(16, pool.taken());
+        assert_eq!(16, pool.max_taken_pos);
+        assert_eq!(17, pool.get_control_block_empty_pointer());
     }
 }
