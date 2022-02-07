@@ -987,4 +987,45 @@ mod tests {
             i += 1;
         }
     }
+
+    #[test]
+    fn test_entries_mut() {
+        println!("test_entries_mut()");
+        let mut pool = Pool::<i32>::with_capacity(1024);
+        // add 16 items in order
+        for i in 1..17 {
+            pool.add(i);
+        }
+        // remove the first 14 items
+        for i in 1..15 {
+            pool.remove_by_pos(i);
+        }
+        // iterate over the remaining 2 items
+        let mut i: u32 = 0;
+        for elem in pool.entries_mut() {
+            if i == 0 {
+                assert_eq!(15, elem.0.index());
+                assert_eq!(15, *elem.1);
+            } else {
+                assert_eq!(16, elem.0.index());
+                assert_eq!(16, *elem.1);
+            }
+            println!("iter element: {:?}", elem);
+            // multiply by 2
+            *elem.1 = 2 * *elem.1;
+            i += 1;
+        }
+        i = 0;
+        for changed in pool.entries() {
+            if i == 0 {
+                assert_eq!(15, changed.0.index());
+                assert_eq!(30, *changed.1);
+            } else {
+                assert_eq!(16, changed.0.index());
+                assert_eq!(32, *changed.1);
+            }
+            println!("iter element: {:?}", changed);
+            i += 1;
+        }
+    }
 }
