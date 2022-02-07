@@ -486,7 +486,7 @@ impl<T> Slot<T> {
 }
 
 /// An `Index` reserves 36 bits for the position, 28 bits for the generation.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct Index {
     id: u64,
 }
