@@ -961,6 +961,7 @@ mod tests {
         assert_eq!(1, pool.get_control_block_empty_pointer());
     }
 
+    //noinspection ALL
     #[test]
     fn test_entries() {
         println!("test_entries()");
@@ -988,6 +989,7 @@ mod tests {
         }
     }
 
+    //noinspection ALL
     #[test]
     fn test_entries_mut() {
         println!("test_entries_mut()");
