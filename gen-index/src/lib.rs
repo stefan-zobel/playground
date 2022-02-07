@@ -316,6 +316,30 @@ impl<T> Pool<T> {
             upper_bound: self.max_taken_pos,
         }
     }
+
+    #[inline]
+    pub fn entries(&self) -> Entry<T> {
+        let mut enumerator = self.data.iter().enumerate();
+        // skip control block
+        enumerator.next();
+        Entry {
+            inner: enumerator,
+            remaining: self.num_taken,
+            upper_bound: self.max_taken_pos,
+        }
+    }
+
+    #[inline]
+    pub fn entries_mut(&mut self) -> EntryMut<T> {
+        let mut enumerator = self.data.iter_mut().enumerate();
+        // skip control block
+        enumerator.next();
+        EntryMut {
+            inner: enumerator,
+            remaining: self.num_taken,
+            upper_bound: self.max_taken_pos,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -327,6 +351,20 @@ pub struct Iter<'a, T: 'a> {
 
 #[derive(Debug)]
 pub struct IterMut<'a, T: 'a> {
+    inner: std::iter::Enumerate<std::slice::IterMut<'a, Slot<T>>>,
+    remaining: usize,
+    upper_bound: usize,
+}
+
+#[derive(Clone, Debug)]
+pub struct Entry<'a, T: 'a> {
+    inner: std::iter::Enumerate<std::slice::Iter<'a, Slot<T>>>,
+    remaining: usize,
+    upper_bound: usize,
+}
+
+#[derive(Debug)]
+pub struct EntryMut<'a, T: 'a> {
     inner: std::iter::Enumerate<std::slice::IterMut<'a, Slot<T>>>,
     remaining: usize,
     upper_bound: usize,
@@ -365,6 +403,39 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T> Iterator for Entry<'a, T> {
+    type Item = (Index, &'a T);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.inner.next() {
+                Some((pos, &Slot::Taken { ref val, gen })) => {
+                    self.remaining -= ONE;
+                    return Some((Index::new(pos as u64, gen), val));
+                }
+                Some((pos, &Slot::Empty { .. })) => {
+                    if pos > self.upper_bound {
+                        assert_eq!(self.remaining, 0usize);
+                        break None;
+                    } else {
+                        continue;
+                    }
+                }
+                None => {
+                    assert_eq!(self.remaining, 0usize);
+                    return None;
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
@@ -375,6 +446,39 @@ impl<'a, T> Iterator for IterMut<'a, T> {
                 Some((_, &mut Slot::Taken { ref mut val, .. })) => {
                     self.remaining -= ONE;
                     return Some(val);
+                }
+                Some((pos, &mut Slot::Empty { .. })) => {
+                    if pos > self.upper_bound {
+                        assert_eq!(self.remaining, 0usize);
+                        break None;
+                    } else {
+                        continue;
+                    }
+                }
+                None => {
+                    assert_eq!(self.remaining, 0usize);
+                    return None;
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl<'a, T> Iterator for EntryMut<'a, T> {
+    type Item = (Index, &'a mut T);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.inner.next() {
+                Some((pos, &mut Slot::Taken { ref mut val, gen })) => {
+                    self.remaining -= ONE;
+                    return Some((Index::new(pos as u64, gen), val));
                 }
                 Some((pos, &mut Slot::Empty { .. })) => {
                     if pos > self.upper_bound {
