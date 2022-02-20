@@ -2,6 +2,14 @@
 name = "func"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 
 [dependencies]
+bytes = "1.1.0"
+prost = "0.9.0"
+
+
+[build-dependencies]
+prost-build = "0.9.0"
+

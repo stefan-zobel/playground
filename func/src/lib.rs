@@ -1,3 +1,5 @@
+mod snazzy_items;
+
 pub trait Handler0: Clone + 'static {
     type Output;
     fn call(&self) -> Self::Output;
