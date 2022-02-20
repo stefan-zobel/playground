@@ -50,8 +50,8 @@ public final class Xyz {
 
         long ret = do_add(a0, a1);
         Xyz convRet = new Xyz(InternalPointerMarker.RAW_PTR, ret);
-        java.lang.ref.Reference.reachabilityFence(a);
-        java.lang.ref.Reference.reachabilityFence(b);
+
+        JNIReachabilityFence.reachabilityFence2(a, b);
 
         return convRet;
     }

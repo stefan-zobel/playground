@@ -29,7 +29,8 @@ public final class TestOptional {
         }
 
         java.util.OptionalLong ret = do_f4(a0);
-        java.lang.ref.Reference.reachabilityFence(foo);
+
+        JNIReachabilityFence.reachabilityFence1(foo);
 
         return ret;
     }
@@ -51,7 +52,8 @@ public final class TestOptional {
 
         String ret = do_f6(a0);
         java.util.Optional<String> convRet = java.util.Optional.ofNullable(ret);
-        java.lang.ref.Reference.reachabilityFence(foo);
+
+        JNIReachabilityFence.reachabilityFence1(foo);
 
         return convRet;
     }
@@ -83,7 +85,8 @@ public final class TestOptional {
         } else {
             convRet = java.util.Optional.empty();
         }
-        java.lang.ref.Reference.reachabilityFence(o);
+
+        JNIReachabilityFence.reachabilityFence1(o);
 
         return convRet;
     }
