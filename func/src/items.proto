@@ -13,3 +13,10 @@ message Shirt {
   string color = 1;
   Size size = 2;
 }
+
+message Void {
+}
+
+service AService {
+  rpc anRpcCall(Shirt) returns (Void);
+}

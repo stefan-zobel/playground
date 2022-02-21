@@ -42,4 +42,5 @@ pub fn main() {
         j.join();
     }
 
+    println!("proto bytes: {:?}", snazzy_items::PROTO);
 }

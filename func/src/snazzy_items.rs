@@ -1,3 +1,6 @@
+
+pub(crate) const PROTO : &'static [u8; 287] = std::include_bytes!("items.proto");
+
 /// A snazzy new shirt!
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Shirt {
