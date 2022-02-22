@@ -25,8 +25,18 @@ pub fn deserialize_shirt(buf: &[u8]) -> Result<Shirt, prost::DecodeError> {
     Shirt::decode(&mut Cursor::new(buf))
 }
 
+const NUMBERS: [i8; 2] = [0, 1];
 
+#[cold]
 pub fn main() {
+
+    let current = 5;
+    let string = match current % 2 {
+        even if even == NUMBERS[0] => "even",
+        odd if odd == NUMBERS[1] => "odd",
+        _ => unreachable!()
+    };
+    println!("{}", string);
 
     let c = Arc::new(Mutex::new(0));
     let mut h = vec![];
