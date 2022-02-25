@@ -72,7 +72,7 @@ checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 name = "cell"
 version = "0.1.0"
 dependencies = [
- "lock",
+ "rwlock_rs",
 ]
 
 [[package]]
@@ -542,6 +542,14 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 [[package]]
 name = "rwcell"
 version = "0.1.0"
+dependencies = [
+ "parking_lot",
+]
+
+[[package]]
+name = "rwlock_rs"
+version = "0.1.0"
+source = "git+https://github.com/stefan-zobel/rwlock-rs#9082905718d842261728ae32e435a1ebf395315c"
 dependencies = [
  "parking_lot",
 ]

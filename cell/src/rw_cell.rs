@@ -1,5 +1,5 @@
 use crate::errors::{ERR_MSG, CellError};
-use lock::Lock;
+use rwlock_rs::Lock;
 use crate::refs::{RwRef, RwRefMut};
 use std::cell::UnsafeCell;
 use std::fmt::Debug;

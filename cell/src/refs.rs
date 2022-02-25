@@ -1,9 +1,9 @@
-use lock::{ReadGuard, WriteGuard};
+use rwlock_rs::{ReadGuard, WriteGuard};
 use std::cell::{Ref, RefMut, UnsafeCell};
 use std::ops::{Deref, DerefMut};
 
 #[derive(Debug)]
-pub struct RwRef<'scope, T: ?Sized> {
+pub struct RwRef<'scope, T> {
     pub(crate) guard: ReadGuard<'scope, UnsafeCell<T>>,
 }
 

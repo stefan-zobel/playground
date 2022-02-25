@@ -6,4 +6,4 @@ edition = "2021"
 
 [dependencies]
 
-lock = {path = "../lock"}
+rwlock_rs = { git = "https://github.com/stefan-zobel/rwlock-rs" }
