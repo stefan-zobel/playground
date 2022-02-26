@@ -6,7 +6,6 @@ pub struct ArcSyncCell<T: ?Sized> {
     arc: Arc<RwCell<T>>,
 }
 
-#[allow(clippy::non_send_fields_in_send_ty)]
 unsafe impl<T> Send for ArcSyncCell<T> where RwCell<T>: Send {}
 unsafe impl<T> Sync for ArcSyncCell<T> where RwCell<T>: Sync {}
 
@@ -14,7 +13,6 @@ pub struct WeakSyncCell<T: ?Sized> {
     weak: Weak<RwCell<T>>,
 }
 
-#[allow(clippy::non_send_fields_in_send_ty)]
 unsafe impl<T> Send for WeakSyncCell<T> where RwCell<T>: Send {}
 unsafe impl<T> Sync for WeakSyncCell<T> where RwCell<T>: Sync {}
 

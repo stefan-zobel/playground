@@ -7,6 +7,7 @@ pub struct RwRef<'scope, T> {
     pub(crate) guard: ReadGuard<'scope, UnsafeCell<T>>,
 }
 
+//noinspection ALL
 impl<T> Deref for RwRef<'_, T> {
     type Target = T;
 
@@ -21,6 +22,7 @@ pub struct RwRefMut<'scope, T: ?Sized> {
     pub(crate) guard: WriteGuard<'scope, UnsafeCell<T>>,
 }
 
+//noinspection ALL
 impl<T> Deref for RwRefMut<'_, T> {
     type Target = T;
 
@@ -30,6 +32,7 @@ impl<T> Deref for RwRefMut<'_, T> {
     }
 }
 
+//noinspection ALL
 impl<T> DerefMut for RwRefMut<'_, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {

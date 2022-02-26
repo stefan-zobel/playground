@@ -21,6 +21,7 @@ impl<T> RwCell<T> {
         }
     }
 
+    //noinspection ALL
     #[inline]
     pub fn try_borrow(&self) -> Option<RwRef<'_, T>> {
         self.lock
@@ -28,6 +29,7 @@ impl<T> RwCell<T> {
             .map(|lock| RwRef { guard: lock })
     }
 
+    //noinspection ALL
     #[inline]
     pub fn try_borrow_mut(&self) -> Option<RwRefMut<'_, T>> {
         self.lock
@@ -80,6 +82,7 @@ impl<T: ?Sized + Default> Default for RwCell<T> {
 mod tests {
     use super::*;
 
+    //noinspection ALL
     #[test]
     fn test_try_borrow_mut() {
         let mut s1: &mut String = &mut String::from("not initialized");
