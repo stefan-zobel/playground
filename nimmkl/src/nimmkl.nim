@@ -50,21 +50,25 @@ type
     ROW_MAJOR_ORDER = LAPACK_ROW_MAJOR,
     COL_MAJOR_ORDER = LAPACK_COL_MAJOR
 
-proc dgbsv*(n: cint; kl: cint; ku: cint;
-           nrhs: cint; ab: ptr cdouble; ldab: cint; ipiv: ptr cint;
-           b: ptr cdouble; ldb: cint): cint =
-  dgbsv(cint(COL_MAJOR_ORDER), n, kl, ku, nrhs, ab, ldab, ipiv, b, ldb)
+proc dgbsv*(n: int; kl: int; ku: int;
+           nrhs: int; ab: seq[float64]; ldab: int; ipiv: ptr cint;
+           b: seq[float64]; ldb: int): int =
+  let xx = if ab.len == 0: nil else: unsafeAddr(ab[0])
+  let yy = if b.len == 0: nil else: unsafeAddr(b[0])
+  dgbsv(COL_MAJOR_ORDER.cint, n.cint, kl.cint, ku.cint, nrhs.cint, xx, ldab.cint, ipiv, yy, ldb.cint)
 
 proc test() =
   var x : float64
-  var y: float64
-  var z: cfloat
-  var ipiv: cint
+  var y : float64
+  var z : cfloat
+  var ab : seq[float64] = @[float64 1, 2, 3]
+  var b : seq[float64] = @[float64 4, 5, 6]
+  var ipiv : cint = 1
 
   dtrmm(Cblas_Layout.CblasRowMajor, Cblas_Side.CblasLeft, Cblas_Uplo.CblasLower, Cblas_Transpose.CblasNoTrans,
   Cblas_Diag.CblasUnit, 1, 2, 1.0, addr x, 3, addr y, 4)
   simatcopy(cchar(TOrder.COL_MAJOR), cchar(TTrans.NO_TRANS), 1, 1, 1.0, addr z, 0, 0)
-  let res = dgbsv(1, 1, 1, 1, addr x, 1, addr ipiv, addr y, 1)
+  let res = dgbsv(1, 1, 1, 1, ab, 0, addr ipiv, b, 1)
   echo res
 
   var eigJob = TEigJob.VALUES_ONLY
