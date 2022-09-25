@@ -26,7 +26,7 @@ type TSide* = enum
   RIGHT = 'R'
 
 type TSvdJob* = enum
-  ALL = 'A',
+  SVDJOB_ALL = 'A',
   NONE = 'N',
   OVERWRITE = 'O',
   PART = 'S'
@@ -52,7 +52,7 @@ proc test() =
   var eigJob = TEigJob.VALUES_ONLY
   dtrmm(Cblas_Layout.CblasRowMajor, Cblas_Side.CblasLeft, Cblas_Uplo.CblasLower, Cblas_Transpose.CblasNoTrans,
   Cblas_Diag.CblasUnit, 1, 2, 1.0, addr x, 3, addr y, 4)
-  simatcopy(char(TOrder.COL_MAJOR), char(TTrans.NO_TRANS), 1, 1, 1.0, addr z, 0, 0)
+  simatcopy(cchar(TOrder.COL_MAJOR), cchar(TTrans.NO_TRANS), 1, 1, 1.0, addr z, 0, 0)
   echo $eigJob & " (TEigJob)"
   var aa = ($eigJob)[0]
   var bb = $eigJob
