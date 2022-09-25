@@ -45,14 +45,29 @@ type TOrder* = enum
   COL_MAJOR = 'C',
   ROW_MAJOR = 'R'
 
+type
+  MatrixLayout* = enum
+    ROW_MAJOR_ORDER = LAPACK_ROW_MAJOR,
+    COL_MAJOR_ORDER = LAPACK_COL_MAJOR
+
+proc dgbsv*(n: cint; kl: cint; ku: cint;
+           nrhs: cint; ab: ptr cdouble; ldab: cint; ipiv: ptr cint;
+           b: ptr cdouble; ldb: cint): cint =
+  dgbsv(cint(COL_MAJOR_ORDER), n, kl, ku, nrhs, ab, ldab, ipiv, b, ldb)
+
 proc test() =
   var x : float64
   var y: float64
   var z: cfloat
-  var eigJob = TEigJob.VALUES_ONLY
+  var ipiv: cint
+
   dtrmm(Cblas_Layout.CblasRowMajor, Cblas_Side.CblasLeft, Cblas_Uplo.CblasLower, Cblas_Transpose.CblasNoTrans,
   Cblas_Diag.CblasUnit, 1, 2, 1.0, addr x, 3, addr y, 4)
   simatcopy(cchar(TOrder.COL_MAJOR), cchar(TTrans.NO_TRANS), 1, 1, 1.0, addr z, 0, 0)
+  let res = dgbsv(1, 1, 1, 1, addr x, 1, addr ipiv, addr y, 1)
+  echo res
+
+  var eigJob = TEigJob.VALUES_ONLY
   echo $eigJob & " (TEigJob)"
   var aa = ($eigJob)[0]
   var bb = $eigJob
