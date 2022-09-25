@@ -52,29 +52,43 @@ type
     MKL_ROW_MAJOR = 101,
     MKL_COL_MAJOR = 102
   Mkl_Transpose* {.size: sizeof(cint).} = enum
-    MKL_NOTRANS = 111, MKL_TRANS = 112, MKL_CONJTRANS = 113
+    MKL_NOTRANS = 111,
+    MKL_TRANS = 112,
+    MKL_CONJTRANS = 113
   Mkl_Uplo* {.size: sizeof(cint).} = enum
-    MKL_UPPER = 121, MKL_LOWER = 122
+    MKL_UPPER = 121,
+    MKL_LOWER = 122
   Mkl_Diag* {.size: sizeof(cint).} = enum
-    MKL_NONUNIT = 131, MKL_UNIT = 132
+    MKL_NONUNIT = 131,
+    MKL_UNIT = 132
   Mkl_Side* {.size: sizeof(cint).} = enum
-    MKL_LEFT = 141, MKL_RIGHT = 142
+    MKL_LEFT = 141,
+    MKL_RIGHT = 142
 
 type
   Cblas_Layout* {.size: sizeof(cint).} = enum
-    CblasRowMajor = 101, ColMajor = 102
+    CblasRowMajor = 101,
+    CblasColMajor = 102
   Cblas_Transpose* {.size: sizeof(cint).} = enum
-    CblasNoTrans = 111, CblasTrans = 112, CblasConjTrans = 113
+    CblasNoTrans = 111,
+    CblasTrans = 112,
+    CblasConjTrans = 113
   Cblas_Uplo* {.size: sizeof(cint).} = enum
-    CblasUpper = 121, CblasLower = 122
+    CblasUpper = 121,
+    CblasLower = 122
   Cblas_Diag* {.size: sizeof(cint).} = enum
-    CblasNonUnit = 131, CblasUnit = 132
+    CblasNonUnit = 131,
+    CblasUnit = 132
   Cblas_Side* {.size: sizeof(cint).} = enum
-    CblasLeft = 141, CblasRight = 142
+    CblasLeft = 141,
+    CblasRight = 142
   Cblas_Storage* {.size: sizeof(cint).} = enum
     CblasPacked = 151
   Cblas_Identifier* {.size: sizeof(cint).} = enum
-    CblasAMatrix = 161, CblasBMatrix = 162
+    CblasAMatrix = 161,
+    CblasBMatrix = 162
   Cblas_Offset* {.size: sizeof(cint).} = enum
-    CblasRowOffset = 171, CblasColOffset = 172, CblasFixOffset = 173
+    CblasRowOffset = 171,
+    CblasColOffset = 172,
+    CblasFixOffset = 173
   Cblas_Order* = Cblas_Layout
