@@ -1,6 +1,5 @@
 import mklTypes
 
-##  this for backward compatibility with CBLAS_ORDER
 ##
 ##  ===========================================================================
 ##  Prototypes for level 1 BLAS functions (complex are recast as routines)
