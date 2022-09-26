@@ -51,11 +51,12 @@ type
     COL_MAJOR_ORDER = LAPACK_COL_MAJOR
 
 proc dgbsv*(n: int; kl: int; ku: int;
-           nrhs: int; ab: seq[float64]; ldab: int; ipiv: ptr cint;
+           nrhs: int; ab: seq[float64]; ldab: int; ipiv: seq[int];
            b: seq[float64]; ldb: int): int =
   let xx = if ab.len == 0: nil else: unsafeAddr(ab[0])
   let yy = if b.len == 0: nil else: unsafeAddr(b[0])
-  dgbsv(COL_MAJOR_ORDER.cint, n.cint, kl.cint, ku.cint, nrhs.cint, xx, ldab.cint, ipiv, yy, ldb.cint)
+  let zz = if ipiv.len == 0: nil else: cast[ptr cint](unsafeAddr(ipiv[0]))
+  dgbsv(COL_MAJOR_ORDER.cint, n.cint, kl.cint, ku.cint, nrhs.cint, xx, ldab.cint, zz, yy, ldb.cint)
 
 proc test() =
   var x : float64
@@ -63,12 +64,12 @@ proc test() =
   var z : cfloat
   var ab : seq[float64] = @[float64 1, 2, 3]
   var b : seq[float64] = @[float64 4, 5, 6]
-  var ipiv : cint = 1
+  var ipiv : seq[int] = @[0, 0, 0]
 
   dtrmm(Cblas_Layout.CblasRowMajor, Cblas_Side.CblasLeft, Cblas_Uplo.CblasLower, Cblas_Transpose.CblasNoTrans,
   Cblas_Diag.CblasUnit, 1, 2, 1.0, addr x, 3, addr y, 4)
-  simatcopy(cchar(TOrder.COL_MAJOR), cchar(TTrans.NO_TRANS), 1, 1, 1.0, addr z, 0, 0)
-  let res = dgbsv(1, 1, 1, 1, ab, 0, addr ipiv, b, 1)
+  simatcopy(TOrder.COL_MAJOR.cchar, TTrans.NO_TRANS.cchar, 1, 1, 1.0, addr z, 0, 0)
+  let res = dgbsv(0, 1, 1, 1, ab, 0, ipiv, b, 1)
   echo res
 
   var eigJob = TEigJob.VALUES_ONLY
@@ -85,7 +86,7 @@ proc test() =
   var dd = char(cc)
   echo dd is char
   echo "dd: " & dd
-  echo dd.type.name
+  echo dd.typeof.name
 
 
 test()
