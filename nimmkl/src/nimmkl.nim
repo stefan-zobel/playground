@@ -1,7 +1,7 @@
 # Copyright (c) 2022 Stefan Zobel
 # Distributed under the Apache v2 License (license terms are at https://www.apache.org/licenses/LICENSE-2.0).
 
-import mklTypes, mklTrans, mklCblas, mklLapacke
+import mklTypes, mklTrans, mklCblas, mklLapacke, mklService
 import typetraits
 
 type TDiag* = enum
@@ -50,6 +50,9 @@ type
     ROW_MAJOR_ORDER = LAPACK_ROW_MAJOR,
     COL_MAJOR_ORDER = LAPACK_COL_MAJOR
 
+proc xerblaCallback(name: cstring; num: ptr cint; len: cint) {.cdecl.} =
+  echo "Callback: Error in function: " & $name
+
 proc dgbsv*(n: int; kl: int; ku: int;
            nrhs: int; ab: seq[float64]; ldab: int; ipiv: seq[int];
            b: seq[float64]; ldb: int): int =
@@ -65,6 +68,11 @@ proc test() =
   var ab : seq[float64] = @[float64 1, 2, 3]
   var b : seq[float64] = @[float64 4, 5, 6]
   var ipiv : seq[int] = @[0, 0, 0]
+
+  let xerbla = proc (name: cstring; num: ptr cint; len: cint) {. cdecl .} = echo "Anonymous: Error in function: " & $name
+  echo xerbla.typeof.name
+  echo xerblaCallback.typeof.name
+  discard mklSetXerbla(xerblaCallback)
 
   dtrmm(Cblas_Layout.CblasRowMajor, Cblas_Side.CblasLeft, Cblas_Uplo.CblasLower, Cblas_Transpose.CblasNoTrans,
   Cblas_Diag.CblasUnit, 1, 2, 1.0, addr x, 3, addr y, 4)
