@@ -7,8 +7,8 @@ const
   LAPACK_TRANSPOSE_MEMORY_ERROR* = -1011
 
 ##  Callback logical functions of one, two, or three arguments are used
-##   to select eigenvalues to sort to the top left of the Schur form.
-##   The value is selected if function returns non-zero.
+##  to select eigenvalues to sort to the top left of the Schur form.
+##  The value is selected if function returns non-zero.
 
 type
   Lapack_S_Select2* = proc (a1: ptr cfloat; a2: ptr cfloat): LapackLogical
@@ -11245,3 +11245,4 @@ proc zhetrsAa2stageWork*(matrixLayout: cint; uplo: char; n: LapackInt; nrhs: Lap
                         ipiv: ptr LapackInt; ipiv2: ptr LapackInt;
                         b: ptr LapackComplexDouble; ldb: LapackInt): LapackInt {.
     importc: "LAPACKE_zhetrs_aa_2stage_work", dynlib: libName.}
+

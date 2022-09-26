@@ -20,6 +20,7 @@ proc dsdot*(n: Mkl_Int; x: ptr cfloat; incX: Mkl_Int; y: ptr cfloat; incY: Mkl_I
     importc: "cblas_dsdot", dynlib: libName.}
 proc sdsdot*(n: Mkl_Int; sb: cfloat; x: ptr cfloat; incX: Mkl_Int; y: ptr cfloat;
             incY: Mkl_Int): cfloat {.importc: "cblas_sdsdot", dynlib: libName.}
+
 ##
 ##  Functions having prefixes Z and C only
 ##
@@ -40,6 +41,7 @@ proc zdotcSub*(n: Mkl_Int; x: pointer; incX: Mkl_Int; y: pointer; incY: Mkl_Int;
               dotc: pointer) {.importc: "cblas_zdotc_sub", dynlib: libName.}
 proc zdotciSub*(n: Mkl_Int; x: pointer; indx: ptr Mkl_Int; y: pointer; dotui: pointer) {.
     importc: "cblas_zdotci_sub", dynlib: libName.}
+
 ##
 ##  Functions having prefixes S D SC DZ
 ##
@@ -60,6 +62,7 @@ proc dznrm2*(n: Mkl_Int; x: pointer; incX: Mkl_Int): cdouble {.importc: "cblas_d
     dynlib: libName.}
 proc dzasum*(n: Mkl_Int; x: pointer; incX: Mkl_Int): cdouble {.importc: "cblas_dzasum",
     dynlib: libName.}
+
 ##
 ##  Functions having standard 4 prefixes (S D C Z)
 ##
@@ -80,6 +83,7 @@ proc icamin*(n: Mkl_Int; x: pointer; incX: Mkl_Int): Cblas_Index {.
     importc: "cblas_icamin", dynlib: libName.}
 proc izamin*(n: Mkl_Int; x: pointer; incX: Mkl_Int): Cblas_Index {.
     importc: "cblas_izamin", dynlib: libName.}
+
 ##
 ##  ===========================================================================
 ##  Prototypes for level 1 BLAS routines
@@ -161,6 +165,7 @@ proc zsctr*(n: Mkl_Int; x: pointer; indx: ptr Mkl_Int; y: pointer) {.
     importc: "cblas_zsctr", dynlib: libName.}
 proc zrotg*(a: pointer; b: pointer; c: ptr cdouble; s: pointer) {.importc: "cblas_zrotg",
     dynlib: libName.}
+
 ##
 ##  Routines with S and D prefix only
 ##
@@ -181,6 +186,7 @@ proc drotm*(n: Mkl_Int; x: ptr cdouble; incX: Mkl_Int; y: ptr cdouble; incY: Mkl
            p: ptr cdouble) {.importc: "cblas_drotm", dynlib: libName.}
 proc droti*(n: Mkl_Int; x: ptr cdouble; indx: ptr Mkl_Int; y: ptr cdouble; c: cdouble;
            s: cdouble) {.importc: "cblas_droti", dynlib: libName.}
+
 ##
 ##  Routines with CS and ZD prefix only
 ##
@@ -189,6 +195,7 @@ proc csrot*(n: Mkl_Int; x: pointer; incX: Mkl_Int; y: pointer; incY: Mkl_Int; c:
            s: cfloat) {.importc: "cblas_csrot", dynlib: libName.}
 proc zdrot*(n: Mkl_Int; x: pointer; incX: Mkl_Int; y: pointer; incY: Mkl_Int; c: cdouble;
            s: cdouble) {.importc: "cblas_zdrot", dynlib: libName.}
+
 ##
 ##  Routines with S D C Z CS and ZD prefixes
 ##
@@ -205,6 +212,7 @@ proc csscal*(n: Mkl_Int; alpha: cfloat; x: pointer; incX: Mkl_Int) {.
     importc: "cblas_csscal", dynlib: libName.}
 proc zdscal*(n: Mkl_Int; alpha: cdouble; x: pointer; incX: Mkl_Int) {.
     importc: "cblas_zdscal", dynlib: libName.}
+
 ##
 ##  ===========================================================================
 ##  Prototypes for level 2 BLAS
@@ -318,6 +326,7 @@ proc ztbsv*(layout: Cblas_Layout; uplo: Cblas_Uplo; transA: Cblas_Transpose;
 proc ztpsv*(layout: Cblas_Layout; uplo: Cblas_Uplo; transA: Cblas_Transpose;
            diag: Cblas_Diag; n: Mkl_Int; ap: pointer; x: pointer; incX: Mkl_Int) {.
     importc: "cblas_ztpsv", dynlib: libName.}
+
 ##
 ##  Routines with S and D prefixes only
 ##
@@ -372,6 +381,7 @@ proc dsyr2*(layout: Cblas_Layout; uplo: Cblas_Uplo; n: Mkl_Int; alpha: cdouble;
 proc dspr2*(layout: Cblas_Layout; uplo: Cblas_Uplo; n: Mkl_Int; alpha: cdouble;
            x: ptr cdouble; incX: Mkl_Int; y: ptr cdouble; incY: Mkl_Int; a: ptr cdouble) {.
     importc: "cblas_dspr2", dynlib: libName.}
+
 ##
 ##  Routines with C and Z prefixes only
 ##
@@ -431,6 +441,7 @@ proc zher2*(layout: Cblas_Layout; uplo: Cblas_Uplo; n: Mkl_Int; alpha: pointer;
 proc zhpr2*(layout: Cblas_Layout; uplo: Cblas_Uplo; n: Mkl_Int; alpha: pointer;
            x: pointer; incX: Mkl_Int; y: pointer; incY: Mkl_Int; ap: pointer) {.
     importc: "cblas_zhpr2", dynlib: libName.}
+
 ##
 ##  ===========================================================================
 ##  Prototypes for level 3 BLAS
@@ -628,6 +639,7 @@ proc ztrsmBatch*(layout: Cblas_Layout; sideArray: ptr Cblas_Side;
                 b_Array: ptr pointer; ldbArray: ptr Mkl_Int; groupCount: Mkl_Int;
                 groupSize: ptr Mkl_Int) {.importc: "cblas_ztrsm_batch",
                                        dynlib: libName.}
+
 ##
 ##  Routines with prefixes C and Z only
 ##
@@ -654,6 +666,7 @@ proc zher2k*(layout: Cblas_Layout; uplo: Cblas_Uplo; trans: Cblas_Transpose;
             n: Mkl_Int; k: Mkl_Int; alpha: pointer; a: pointer; lda: Mkl_Int; b: pointer;
             ldb: Mkl_Int; beta: cdouble; c: pointer; ldc: Mkl_Int) {.
     importc: "cblas_zher2k", dynlib: libName.}
+
 ##
 ##  Routines with prefixes S and D only
 ##
@@ -684,6 +697,7 @@ proc dgemmCompute*(layout: Cblas_Layout; transA: Mkl_Int; transB: Mkl_Int; m: Mk
                   ldb: Mkl_Int; beta: cdouble; c: ptr cdouble; ldc: Mkl_Int) {.
     importc: "cblas_dgemm_compute", dynlib: libName.}
 proc dgemmFree*(dest: ptr cdouble) {.importc: "cblas_dgemm_free", dynlib: libName.}
+
 ##
 ##  Integer Routines
 ##
@@ -727,3 +741,4 @@ proc gemmS16s16s32Compute*(layout: Cblas_Layout; transA: Cblas_Transpose;
                           b: ptr Mkl_Int16; ldb: Mkl_Int; bo: Mkl_Int16; beta: cfloat;
                           c: ptr Mkl_Int32; ldc: Mkl_Int; co: ptr Mkl_Int32) {.
     importc: "cblas_gemm_s16s16s32_compute", dynlib: libName.}
+
