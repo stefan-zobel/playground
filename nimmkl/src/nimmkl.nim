@@ -78,7 +78,7 @@ proc test() =
   Cblas_Diag.CblasUnit, 1, 2, 1.0, addr x, 3, addr y, 4)
   simatcopy(TOrder.COL_MAJOR.cchar, TTrans.NO_TRANS.cchar, 1, 1, 1.0, addr z, 0, 0)
   let res = dgbsv(0, 1, 1, 1, ab, 0, ipiv, b, 1)
-  echo res
+  echo "result: " & $res
 
   var eigJob = TEigJob.VALUES_ONLY
   echo $eigJob & " (TEigJob)"
