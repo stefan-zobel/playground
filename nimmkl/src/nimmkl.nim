@@ -52,6 +52,8 @@ type
 
 proc xerblaCallback(name: cstring; num: ptr cint; len: cint) {.cdecl.} =
   echo "Callback: Error in function: " & $name
+  echo "Error code or position: " & $num[]
+  echo "At parameter position: " & $num[]
 
 proc dgbsv*(n: int; kl: int; ku: int;
            nrhs: int; ab: seq[float64]; ldab: int; ipiv: seq[int];
